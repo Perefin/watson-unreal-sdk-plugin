@@ -32,10 +32,6 @@
     {
       "Name": "OnlineSubsystemNull",
       "Enabled": true
-    },
-    {
-      "Name": "WebSocket",
-      "Enabled":  true
     }
   ]
 }
