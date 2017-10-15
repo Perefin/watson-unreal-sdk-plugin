@@ -10,12 +10,16 @@ UCLASS()
 class WATSONSDK_API UMicrophone : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
+
 private:
 	TSharedPtr<class IVoiceCapture> VoiceCapture;
 
 public:
-	UPROPERTY() TArray<uint8> VoiceCaptureBuffer;
-	UPROPERTY() int32 VoiceCaptureSize;
+	UPROPERTY()
+	TArray<uint8> VoiceCaptureBuffer;
+	
+	UPROPERTY()
+	int32 VoiceCaptureSize;
 
 	UMicrophone();
 	~UMicrophone();

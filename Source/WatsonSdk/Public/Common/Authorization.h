@@ -7,8 +7,12 @@ USTRUCT()
 struct FAuthorization
 {
 	GENERATED_USTRUCT_BODY()
-	UPROPERTY() FString username;
-	UPROPERTY() FString password;
+
+	UPROPERTY()
+	FString username;
+	
+	UPROPERTY()
+	FString password;
 	
 	FAuthorization() {}
 	FAuthorization(FString username, FString password) :
