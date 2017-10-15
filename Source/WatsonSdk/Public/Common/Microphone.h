@@ -22,7 +22,6 @@ public:
 	int32 VoiceCaptureSize;
 
 	UMicrophone();
-	~UMicrophone();
 
 	void StartRecording();
 	void StopRecording();
@@ -33,4 +32,6 @@ public:
 	bool IsTickableWhenPaused() const override;
 	bool IsTickable() const override;
 	TStatId GetStatId() const override;
+
+	virtual void BeginDestroy() override;
 };
