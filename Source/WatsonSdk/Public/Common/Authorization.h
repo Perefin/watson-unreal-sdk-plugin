@@ -9,18 +9,18 @@ struct FAuthorization
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FString username;
+	FString Username;
 	
 	UPROPERTY()
-	FString password;
+	FString Password;
 	
 	FAuthorization() {}
 	FAuthorization(FString username, FString password) :
-		username(username),
-		password(password)
+		Username(username),
+		Password(password)
 	{}
 
-	FString encode() {
-		return "Basic " + FBase64::Encode(username + ":" + password);
+	FString Encode() {
+		return "Basic " + FBase64::Encode(Username + ":" + Password);
 	}
 };

@@ -20,7 +20,7 @@ TSharedPtr<FSpeechToTextRecognizeDelegate> USpeechToText::Recognize(TArray<uint8
 	HttpRequest->SetURL(Configuration.Url + "recognize?model=" + AudioModel);
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("audio/l16;rate=16000;channels=1;"));
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContent(AudioData);
 
 	TSharedPtr<FSpeechToTextRecognizeDelegate> Delegate = MakeShareable(new FSpeechToTextRecognizeDelegate);

@@ -24,7 +24,7 @@ TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSyn
 	HttpRequest->SetHeader(TEXT("Accept"), TEXT("audio/l16;rate=16000;channels=1;"));
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContentAsString(Content);
 
 	TSharedPtr<FTextToSpeechSynthesizeDelegate> Delegate = MakeShareable(new FTextToSpeechSynthesizeDelegate);
