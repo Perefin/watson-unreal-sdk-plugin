@@ -43,7 +43,7 @@ void UTextToSpeech::OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSen
 	{
 		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
 		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioLength = BytesReceived;
+		SynthesisResponse->AudioLength = BytesReceived;
 	}	
 }
 
@@ -54,7 +54,7 @@ void UTextToSpeech::OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponseP
 	{
 		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
 		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioData = TArray<uint8>(Response->GetContent());
+		SynthesisResponse->AudioData = TArray<uint8>(Response->GetContent());
 		Progress->Delegate.Get()->ExecuteIfBound(SynthesisResponse, nullptr);
 		PendingSynthesisRequests.Remove(Request);
 	}

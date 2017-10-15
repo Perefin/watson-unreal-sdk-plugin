@@ -8,7 +8,7 @@ struct FSynthesizeRequest
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FString text;
+	FString Text;
 
 	FSynthesizeRequest() {}
 };
@@ -19,10 +19,10 @@ struct FSynthesizeResponse
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	TArray<uint8> audioData;
+	TArray<uint8> AudioData;
 
 	UPROPERTY()
-	uint32 audioLength;
+	uint32 AudioLength;
 
 	FSynthesizeResponse() {}
 };
