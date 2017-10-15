@@ -33,10 +33,10 @@ struct FSynthesizeError
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FString error;
+	FString Error;
 
 	UPROPERTY()
-	int32 code;
+	int32 Code;
 
 	FSynthesizeError() {}
 };
