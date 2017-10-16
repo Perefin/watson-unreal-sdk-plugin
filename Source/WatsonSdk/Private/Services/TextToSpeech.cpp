@@ -24,7 +24,7 @@ TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSyn
 	HttpRequest->SetHeader(TEXT("Accept"), TEXT("audio/l16;rate=16000;channels=1;"));
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContentAsString(Content);
 
 	TSharedPtr<FTextToSpeechSynthesizeDelegate> Delegate = MakeShareable(new FTextToSpeechSynthesizeDelegate);
@@ -43,7 +43,7 @@ void UTextToSpeech::OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSen
 	{
 		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
 		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioLength = BytesReceived;
+		SynthesisResponse->AudioLength = BytesReceived;
 	}	
 }
 
@@ -54,7 +54,7 @@ void UTextToSpeech::OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponseP
 	{
 		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
 		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioData = TArray<uint8>(Response->GetContent());
+		SynthesisResponse->AudioData = TArray<uint8>(Response->GetContent());
 		Progress->Delegate.Get()->ExecuteIfBound(SynthesisResponse, nullptr);
 		PendingSynthesisRequests.Remove(Request);
 	}

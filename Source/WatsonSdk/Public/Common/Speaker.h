@@ -9,9 +9,13 @@ UCLASS()
 class WATSONSDK_API USpeaker : public UObject
 {
 	GENERATED_BODY()
+
 private:
-	UPROPERTY() UAudioComponent* AudioOutputComponent;
-	UPROPERTY() USoundWaveProcedural* AudioPCMComponent;
+	UPROPERTY()
+	UAudioComponent* AudioOutputComponent;
+	
+	UPROPERTY()
+	USoundWaveProcedural* AudioPCMComponent;
 
 public:
 	USpeaker();

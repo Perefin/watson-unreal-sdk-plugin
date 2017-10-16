@@ -15,6 +15,7 @@ UCLASS()
 class WATSONSDK_API UConversation : public UObject
 {
 	GENERATED_BODY()
+
 public:
 	FAuthorization Authorization;
 	FConfiguration Configuration;

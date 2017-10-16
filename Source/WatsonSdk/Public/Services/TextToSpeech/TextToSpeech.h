@@ -12,6 +12,7 @@ UCLASS()
 class WATSONSDK_API UTextToSpeech : public UObject
 {
 	GENERATED_BODY()
+
 public:
 	FAuthorization Authorization;
 	FConfiguration Configuration;
