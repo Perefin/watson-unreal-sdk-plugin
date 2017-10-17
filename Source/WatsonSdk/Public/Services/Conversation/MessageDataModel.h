@@ -6,9 +6,9 @@ USTRUCT()
 struct FConversationContext
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString ConversationId;
+	FString conversation_id;
 	
 	FConversationContext() {}
 };
@@ -17,12 +17,12 @@ USTRUCT()
 struct FConversationRuntimeIntent
 {
 	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	FString Intent;
 	
 	UPROPERTY()
-	float Confidence;
+	FString intent;
+	
+	UPROPERTY()
+	float confidence;
 	
 	FConversationRuntimeIntent() {}
 };
@@ -33,16 +33,16 @@ struct FConversationRuntimeEntity
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FString Entity;
+	FString entity;
 	
 	UPROPERTY()
-	TArray<int32> Location;
+	TArray<int32> location;
 	
 	UPROPERTY()
-	FString Value;
+	FString value;
 	
 	UPROPERTY()
-	float Confidence;
+	float confidence;
 	
 	FConversationRuntimeEntity() {}
 };
@@ -53,10 +53,10 @@ struct FConversationLogMessage
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FString Level;
+	FString level;
 	
 	UPROPERTY()
-	FString Msg;
+	FString msg;
 	
 	FConversationLogMessage() {}
 };
@@ -65,15 +65,15 @@ USTRUCT()
 struct FConversationOutputData
 {
 	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	TArray<FConversationLogMessage> LogMessages;
 	
 	UPROPERTY()
-	TArray<FString> Text;
+	TArray<FConversationLogMessage> log_messages;
 	
 	UPROPERTY()
-	TArray<FString> NodesVisited;
+	TArray<FString> text;
+	
+	UPROPERTY()
+	TArray<FString> nodes_visited;
 	
 	FConversationOutputData() {}
 };
@@ -82,9 +82,9 @@ USTRUCT()
 struct FConversationInputData
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Text;
+	FString text;
 	
 	FConversationInputData() {}
 };
@@ -93,25 +93,25 @@ USTRUCT()
 struct FConversationMessageRequest
 {
 	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	FConversationInputData Input;
 	
 	UPROPERTY()
-	bool AlternateIntents;
+	FConversationInputData input;
 	
 	UPROPERTY()
-	FConversationContext Context;
+	bool alternate_intents;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeEntity> Entities;
+	FConversationContext context;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeIntent> Intents;
+	TArray<FConversationRuntimeEntity> entities;
 	
 	UPROPERTY()
-	FConversationOutputData Output;
+	TArray<FConversationRuntimeIntent> intents;
 	
+	UPROPERTY()
+	
+	FConversationOutputData output;
 	FConversationMessageRequest() {}
 };
 
@@ -119,9 +119,9 @@ USTRUCT()
 struct FConversationMessageInput
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Text;
+	FString text;
 	
 	FConversationMessageInput() {}
 };
@@ -132,22 +132,22 @@ struct FConversationMessageResponse
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FConversationMessageInput Input;
+	FConversationMessageInput input;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeIntent> Intents;
+	TArray<FConversationRuntimeIntent> intents;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeEntity> Entities;
+	TArray<FConversationRuntimeEntity> entities;
 	
 	UPROPERTY()
-	bool AlternateIntents;
+	bool alternate_intents;
 	
 	UPROPERTY()
-	FConversationContext Context;
+	FConversationContext context;
 	
 	UPROPERTY()
-	FConversationOutputData Output;
+	FConversationOutputData output;
 	
 	FConversationMessageResponse() {}
 };
@@ -158,10 +158,10 @@ struct FConversationMessageErrorDetail
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FString Message;
+	FString message;
 	
 	UPROPERTY()
-	FString Path;
+	FString path;
 	
 	FConversationMessageErrorDetail() {}
 };
@@ -172,10 +172,10 @@ struct FConversationMessageError
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FString Error;
+	FString error;
 	
 	UPROPERTY()
-	TArray<FConversationMessageErrorDetail> Errors;
-
+	TArray<FConversationMessageErrorDetail> errors;
+	
 	FConversationMessageError() {}
 };

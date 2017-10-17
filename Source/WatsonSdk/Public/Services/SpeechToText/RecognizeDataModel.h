@@ -6,19 +6,19 @@ USTRUCT()
 struct FKeywordResult
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString NormalizedText;
-
+	FString normalized_text;
+	
 	UPROPERTY()
-	int32 StartTime;
-
+	int32 start_time;
+	
 	UPROPERTY()
-	int32 EndTime;
-
+	int32 end_time;
+	
 	UPROPERTY()
-	int32 Confidence;
-
+	int32 confidence;
+	
 	FKeywordResult() {}
 };
 
@@ -26,21 +26,21 @@ USTRUCT()
 struct FSpeakerLabelsResult
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	int32 From;
-
+	int32 from;
+	
 	UPROPERTY()
-	int32 To;
-
+	int32 to;
+	
 	UPROPERTY()
-	int32 Speaker;
-
+	int32 speaker;
+	
 	UPROPERTY()
-	int32 Confidence;
+	int32 confidence;
 
 	//UPROPERTY()
-	//bool Final;
+	//bool final;
 
 	FSpeakerLabelsResult() {}
 };
@@ -49,18 +49,18 @@ USTRUCT()
 struct FSpeechRecognitionAlternative
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Transcript;
-
+	FString transcript;
+	
 	UPROPERTY()
-	int32 Confidence;
-
+	int32 confidence;
+	
 	UPROPERTY()
-	TArray<FString> Timestamps;
-
+	TArray<FString> timestamps;
+	
 	UPROPERTY()
-	TArray<FString> WordConfidence;
+	TArray<FString> word_confidence;
 
 	FSpeechRecognitionAlternative() {}
 };
@@ -69,12 +69,12 @@ USTRUCT()
 struct FWordAlternativeResult
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	int32 Confidence;
-
+	int32 confidence;
+	
 	UPROPERTY()
-	FString Word;
+	FString word;
 
 	FWordAlternativeResult() {}
 };
@@ -83,15 +83,15 @@ USTRUCT()
 struct FWordAlternativeResults
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	int32 StartTime;
-
+	int32 start_time;
+	
 	UPROPERTY()
-	int32 EndTime;
-
+	int32 end_time;
+	
 	UPROPERTY()
-	TArray<FWordAlternativeResult> Alternatives;
+	TArray<FWordAlternativeResult> alternatives;
 
 	FWordAlternativeResults() {}
 };
@@ -100,16 +100,16 @@ USTRUCT()
 struct FSpeechRecognitionResult
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	//UPROPERTY()
-	//bool Final;
-
+	//bool final;
+	
 	UPROPERTY()
 	TArray<FSpeechRecognitionAlternative> alternatives;
-
+	
 	UPROPERTY()
 	TMap<FString, FKeywordResult> keyword_results;
-
+	
 	UPROPERTY()
 	TArray<FWordAlternativeResults> word_alternatives;
 
@@ -120,18 +120,18 @@ USTRUCT()
 struct FSpeechRecognitionEvent
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	TArray<FSpeechRecognitionResult> Results;
-
+	TArray<FSpeechRecognitionResult> results;
+	
 	UPROPERTY()
-	int32 ResultIndex;
-
+	int32 result_index;
+	
 	UPROPERTY()
-	TArray<FSpeakerLabelsResult> SpeakerLabels;
-
+	TArray<FSpeakerLabelsResult> speaker_labels;
+	
 	UPROPERTY()
-	TArray<FString> Warnings;
+	TArray<FString> warnings;
 
 	FSpeechRecognitionEvent() {}
 };
@@ -140,19 +140,19 @@ USTRUCT()
 struct FSpeechToTextError
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Error;
-
+	FString error;
+	
 	UPROPERTY()
-	int32 Code;
-
+	int32 code;
+	
 	UPROPERTY()
-	FString CodeDescription;
-
+	FString code_description;
+	
 	UPROPERTY()
-	TArray<FString> Warnings;
-
+	TArray<FString> warnings;
+	
 	FSpeechToTextError() {}
 };
 

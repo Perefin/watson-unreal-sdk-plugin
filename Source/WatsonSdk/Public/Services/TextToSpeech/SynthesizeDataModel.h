@@ -6,10 +6,10 @@ USTRUCT()
 struct FSynthesizeRequest
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Text;
-
+	FString text;
+	
 	FSynthesizeRequest() {}
 };
 
@@ -17,13 +17,13 @@ USTRUCT()
 struct FSynthesizeResponse
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	TArray<uint8> AudioData;
-
+	TArray<uint8> audioData;
+	
 	UPROPERTY()
-	uint32 AudioLength;
-
+	uint32 audioLength;
+	
 	FSynthesizeResponse() {}
 };
 
@@ -31,13 +31,13 @@ USTRUCT()
 struct FSynthesizeError
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY()
-	FString Error;
-
+	FString error;
+	
 	UPROPERTY()
-	int32 Code;
-
+	int32 code;
+	
 	FSynthesizeError() {}
 };
 
