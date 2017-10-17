@@ -10,13 +10,6 @@ UMicrophone::UMicrophone()
 	VoiceCaptureSize = 0;
 }
 
-UMicrophone::~UMicrophone()
-{
-	VoiceCapture->Shutdown();
-	VoiceCaptureBuffer.Empty();
-	VoiceCaptureSize = 0;
-}
-
 void UMicrophone::StartRecording()
 {
 	VoiceCaptureBuffer.Empty();
@@ -70,4 +63,11 @@ bool UMicrophone::IsTickable() const
 TStatId UMicrophone::GetStatId() const
 {
 	return TStatId();
+}
+
+void UMicrophone::BeginDestroy()
+{
+	VoiceCapture->Shutdown();
+	VoiceCaptureBuffer.Empty();
+	VoiceCaptureSize = 0;
 }

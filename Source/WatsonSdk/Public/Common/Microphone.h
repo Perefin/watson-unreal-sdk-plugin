@@ -10,15 +10,18 @@ UCLASS()
 class WATSONSDK_API UMicrophone : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
+
 private:
 	TSharedPtr<class IVoiceCapture> VoiceCapture;
 
 public:
-	UPROPERTY() TArray<uint8> VoiceCaptureBuffer;
-	UPROPERTY() int32 VoiceCaptureSize;
+	UPROPERTY()
+	TArray<uint8> VoiceCaptureBuffer;
+	
+	UPROPERTY()
+	int32 VoiceCaptureSize;
 
 	UMicrophone();
-	~UMicrophone();
 
 	void StartRecording();
 	void StopRecording();
@@ -29,4 +32,6 @@ public:
 	bool IsTickableWhenPaused() const override;
 	bool IsTickable() const override;
 	TStatId GetStatId() const override;
+
+	virtual void BeginDestroy() override;
 };

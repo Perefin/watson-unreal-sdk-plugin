@@ -46,12 +46,13 @@ public class WatsonSdk : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+                "WebSockets",
 				//"Slate",
                 //"SlateCore",
 
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
+            );
 		
 		
 		DynamicallyLoadedModuleNames.AddRange(

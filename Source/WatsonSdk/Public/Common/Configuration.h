@@ -6,9 +6,15 @@ USTRUCT()
 struct FConfiguration
 {
 	GENERATED_USTRUCT_BODY()
-	UPROPERTY() FString Url;
-	UPROPERTY() FString UserAgent;
-	UPROPERTY() FString Version;
+	
+	UPROPERTY()
+	FString Url;
+	
+	UPROPERTY()
+	FString UserAgent;
+	
+	UPROPERTY()
+	FString Version;
 
 	FConfiguration() {}
 	FConfiguration(FString Url, FString UserAgent, FString Version) :

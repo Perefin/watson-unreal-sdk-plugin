@@ -23,7 +23,7 @@ TSharedPtr<FConversationMessageDelegate> UConversation::Message(const FString& W
 	HttpRequest->SetURL(Configuration.Url + "workspaces/" + Workspace + "/message?version=" + Configuration.Version);
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContentAsString(Content);
 
 	TSharedPtr<FConversationMessageDelegate> Delegate = MakeShareable(new FConversationMessageDelegate);
