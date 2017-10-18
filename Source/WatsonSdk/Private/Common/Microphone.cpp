@@ -67,6 +67,7 @@ TStatId UMicrophone::GetStatId() const
 
 void UMicrophone::BeginDestroy()
 {
+	Super::BeginDestroy();
 	VoiceCapture->Shutdown();
 	VoiceCaptureBuffer.Empty();
 	VoiceCaptureSize = 0;
