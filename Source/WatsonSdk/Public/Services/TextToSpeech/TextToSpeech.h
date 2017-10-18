@@ -33,6 +33,6 @@ public:
 	* @param Request		The text to be synthesized
 	* @return				Delegate called when the request is complete with the audio stream
 	*/
-	TSharedPtr<FTextToSpeechSynthesizeDelegate> Synthesize(const FSynthesizeRequest& Request);
+	TSharedPtr<FTextToSpeechSynthesizeDelegate> Synthesize(const FSynthesizeRequest& Request, const FString& Voice = FString("en-US_MichaelVoice"));
 
 };

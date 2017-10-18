@@ -13,14 +13,14 @@ UTextToSpeech::UTextToSpeech()
 //////////////////////////////////////////////////////////////////////////
 // Synthesize Audio
 
-TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSynthesizeRequest& Request)
+TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSynthesizeRequest& Request, const FString& Voice)
 {
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(FSynthesizeRequest::StaticStruct(), &Request, Content, 0, 0);
 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
-	HttpRequest->SetURL(Configuration.Url + "synthesize?voice=en-US_MichaelVoice");
+	HttpRequest->SetURL(Configuration.Url + "synthesize?voice=" + Voice);
 	HttpRequest->SetHeader(TEXT("Accept"), TEXT("audio/l16;rate=16000;channels=1;"));
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
