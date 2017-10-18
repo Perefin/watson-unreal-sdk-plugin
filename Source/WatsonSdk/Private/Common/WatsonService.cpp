@@ -13,7 +13,8 @@ TSharedRef<IHttpRequest> WatsonService::BuildRestRequest(
 	FString FullUrl = FString(Url);
 	for (auto& Path : Paths)
 	{
-		FullUrl += "/" + Path;
+		FullUrl += "/";
+		FullUrl += Path;
 	}
 	HttpRequest->SetURL(FullUrl);
 	return HttpRequest;

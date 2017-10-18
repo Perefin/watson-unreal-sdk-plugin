@@ -4,9 +4,13 @@
 
 UMicrophone::UMicrophone()
 {
-	VoiceCapture = FVoiceModule::Get().CreateVoiceCapture();
-	VoiceCapture->Init(VOICE_SAMPLE_RATE, NUM_VOICE_CHANNELS);
-	VoiceCaptureBuffer.SetNumUninitialized(10000);
+    VoiceCapture = FVoiceModule::Get().CreateVoiceCapture();
+    uint32 AvailableVoiceData;
+    if (VoiceCapture->GetCaptureState(AvailableVoiceData) == EVoiceCaptureState::UnInitialized)
+    {
+        VoiceCapture->Init(VOICE_SAMPLE_RATE, NUM_VOICE_CHANNELS);
+    }
+    VoiceCaptureBuffer.SetNumUninitialized(10000);
 	VoiceCaptureSize = 0;
 }
 
