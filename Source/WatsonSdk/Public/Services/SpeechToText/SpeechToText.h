@@ -24,7 +24,7 @@ public:
 	// Sessionless Recognize Audio
 
 private:
-	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FSpeechToTextRecognizeDelegate>> PendingRecognizeRequests;
+	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FSpeechToTextRecognizePendingRequest>> PendingRecognizeRequests;
 	void OnRecognizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 public:
@@ -35,6 +35,6 @@ public:
 	 * @param AudioModel	The identifier of the model to be used for the recognition request
 	 * @return				Delegate called when the request is complete.
 	 */
-	TSharedPtr<FSpeechToTextRecognizeDelegate> Recognize(TArray<uint8> AudioData, const FString& AudioModel);
+	FSpeechToTextRecognizePendingRequest* Recognize(TArray<uint8> AudioData, const FString& AudioModel = FString("en-US_BroadbandModel"));
 
 };

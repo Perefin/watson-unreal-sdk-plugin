@@ -13,7 +13,7 @@ USpeechToText::USpeechToText()
 //////////////////////////////////////////////////////////////////////////
 // Sessionless Recognize Audio
 
-TSharedPtr<FSpeechToTextRecognizeDelegate> USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel)
+FSpeechToTextRecognizePendingRequest* USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel)
 {
 	TSharedPtr<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
@@ -22,26 +22,46 @@ TSharedPtr<FSpeechToTextRecognizeDelegate> USpeechToText::Recognize(TArray<uint8
 	HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("audio/l16;rate=16000;channels=1;"));
 	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContent(AudioData);
-
-	TSharedPtr<FSpeechToTextRecognizeDelegate> Delegate = MakeShareable(new FSpeechToTextRecognizeDelegate);
-	PendingRecognizeRequests.Add(HttpRequest, Delegate);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &USpeechToText::OnRecognizeComplete);
-	HttpRequest->ProcessRequest();
-	return Delegate;
+
+	TSharedPtr<FSpeechToTextRecognizePendingRequest> Delegate = MakeShareable(new FSpeechToTextRecognizePendingRequest);
+	PendingRecognizeRequests.Add(HttpRequest, Delegate);
+	Delegate->HttpRequest = HttpRequest;
+	return Delegate.Get();
 }
 
 void USpeechToText::OnRecognizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	TSharedPtr<FSpeechToTextRecognizeDelegate>* DelegatePtr = PendingRecognizeRequests.Find(Request);
-	if (DelegatePtr != nullptr)
+	TSharedPtr<FSpeechToTextRecognizePendingRequest>* DelegatePtr = PendingRecognizeRequests.Find(Request);
+	if (DelegatePtr == nullptr)
 	{
-		TSharedPtr<FSpeechRecognitionEvent> RecognizeResponse = MakeShareable(new FSpeechRecognitionEvent);
-		FString SerializedResponseBody(Response->GetContentAsString());
-		FJsonObjectConverter::JsonObjectStringToUStruct<FSpeechRecognitionEvent>(SerializedResponseBody, RecognizeResponse.Get(), 0, 0);
-
-		TSharedPtr<FSpeechToTextRecognizeDelegate> Delegate = *DelegatePtr;
-		Delegate.Get()->ExecuteIfBound(RecognizeResponse, nullptr);
-		PendingRecognizeRequests.Remove(Request);
+		return;
 	}
+
+	TSharedPtr<FSpeechToTextRecognizePendingRequest> Delegate = *DelegatePtr;
+	if (!bWasSuccessful)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		PendingRecognizeRequests.Remove(Request);
+		return;
+	}
+
+	if (Response->GetResponseCode() != 200)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
+		PendingRecognizeRequests.Remove(Request);
+		return;
+	}
+
+	TSharedPtr<FSpeechToTextRecognizeResponse> RecognizeResponse = MakeShareable(new FSpeechToTextRecognizeResponse);
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FSpeechToTextRecognizeResponse>(Response->GetContentAsString(), RecognizeResponse.Get(), 0, 0))
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Could not deserialize: ") + Response->GetContentAsString());
+		PendingRecognizeRequests.Remove(Request);
+		return;
+	}
+
+	Delegate->OnSuccess.ExecuteIfBound(RecognizeResponse);
+	PendingRecognizeRequests.Remove(Request);
 }
 

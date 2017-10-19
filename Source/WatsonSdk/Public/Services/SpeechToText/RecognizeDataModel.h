@@ -3,7 +3,7 @@
 #include "RecognizeDataModel.generated.h"
 
 USTRUCT()
-struct FKeywordResult
+struct FSpeechToTextRecognizeKeywordResult
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -19,11 +19,11 @@ struct FKeywordResult
 	UPROPERTY()
 	int32 confidence;
 	
-	FKeywordResult() {}
+	FSpeechToTextRecognizeKeywordResult() {}
 };
 
 USTRUCT()
-struct FSpeakerLabelsResult
+struct FSpeechToTextRecognizeSpeakerLabelsResult
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -42,11 +42,11 @@ struct FSpeakerLabelsResult
 	//UPROPERTY()
 	//bool final;
 
-	FSpeakerLabelsResult() {}
+	FSpeechToTextRecognizeSpeakerLabelsResult() {}
 };
 
 USTRUCT()
-struct FSpeechRecognitionAlternative
+struct FSpeechToTextRecognizeAlternative
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -62,11 +62,11 @@ struct FSpeechRecognitionAlternative
 	UPROPERTY()
 	TArray<FString> word_confidence;
 
-	FSpeechRecognitionAlternative() {}
+	FSpeechToTextRecognizeAlternative() {}
 };
 
 USTRUCT()
-struct FWordAlternativeResult
+struct FSpeechToTextRecognizeWordAlternativeResult
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -76,11 +76,11 @@ struct FWordAlternativeResult
 	UPROPERTY()
 	FString word;
 
-	FWordAlternativeResult() {}
+	FSpeechToTextRecognizeWordAlternativeResult() {}
 };
 
 USTRUCT()
-struct FWordAlternativeResults
+struct FSpeechToTextRecognizeWordAlternativeResults
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -91,13 +91,13 @@ struct FWordAlternativeResults
 	int32 end_time;
 	
 	UPROPERTY()
-	TArray<FWordAlternativeResult> alternatives;
+	TArray<FSpeechToTextRecognizeWordAlternativeResult> alternatives;
 
-	FWordAlternativeResults() {}
+	FSpeechToTextRecognizeWordAlternativeResults() {}
 };
 
 USTRUCT()
-struct FSpeechRecognitionResult
+struct FSpeechToTextRecognizeResult
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -105,39 +105,39 @@ struct FSpeechRecognitionResult
 	//bool final;
 	
 	UPROPERTY()
-	TArray<FSpeechRecognitionAlternative> alternatives;
+	TArray<FSpeechToTextRecognizeAlternative> alternatives;
 	
 	UPROPERTY()
-	TMap<FString, FKeywordResult> keyword_results;
+	TMap<FString, FSpeechToTextRecognizeKeywordResult> keyword_results;
 	
 	UPROPERTY()
-	TArray<FWordAlternativeResults> word_alternatives;
+	TArray<FSpeechToTextRecognizeWordAlternativeResults> word_alternatives;
 
-	FSpeechRecognitionResult() {}
+	FSpeechToTextRecognizeResult() {}
 };
 
 USTRUCT()
-struct FSpeechRecognitionEvent
+struct FSpeechToTextRecognizeResponse
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	TArray<FSpeechRecognitionResult> results;
+	TArray<FSpeechToTextRecognizeResult> results;
 	
 	UPROPERTY()
 	int32 result_index;
 	
 	UPROPERTY()
-	TArray<FSpeakerLabelsResult> speaker_labels;
+	TArray<FSpeechToTextRecognizeSpeakerLabelsResult> speaker_labels;
 	
 	UPROPERTY()
 	TArray<FString> warnings;
 
-	FSpeechRecognitionEvent() {}
+	FSpeechToTextRecognizeResponse() {}
 };
 
 USTRUCT()
-struct FSpeechToTextError
+struct FSpeechToTextRecognizeError
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -153,8 +153,19 @@ struct FSpeechToTextError
 	UPROPERTY()
 	TArray<FString> warnings;
 	
-	FSpeechToTextError() {}
+	FSpeechToTextRecognizeError() {}
 };
 
 
-DECLARE_DELEGATE_TwoParams(FSpeechToTextRecognizeDelegate, TSharedPtr<FSpeechRecognitionEvent>, TSharedPtr<FSpeechToTextError>)
+DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeSuccessDelegate, TSharedPtr<FSpeechToTextRecognizeResponse>)
+DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeFailureDelegate, FString)
+struct FSpeechToTextRecognizePendingRequest
+{
+	TSharedPtr<IHttpRequest> HttpRequest;
+	FSpeechToTextRecognizeSuccessDelegate OnSuccess;
+	FSpeechToTextRecognizeFailureDelegate OnFailure;
+	void Send()
+	{
+		HttpRequest->ProcessRequest();
+	}
+};
