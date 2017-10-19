@@ -13,10 +13,10 @@ UTextToSpeech::UTextToSpeech()
 //////////////////////////////////////////////////////////////////////////
 // Synthesize Audio
 
-TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSynthesizeRequest& Request, const FString& Voice)
+FTextToSpeechSynthesizePendingRequest* UTextToSpeech::Synthesize(const FTextToSpeechSynthesizeRequest& Request, const FString& Voice)
 {
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(FSynthesizeRequest::StaticStruct(), &Request, Content, 0, 0);
+	FJsonObjectConverter::UStructToJsonObjectString(FTextToSpeechSynthesizeRequest::StaticStruct(), &Request, Content, 0, 0);
 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
@@ -26,36 +26,50 @@ TSharedPtr<FTextToSpeechSynthesizeDelegate> UTextToSpeech::Synthesize(const FSyn
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
 	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContentAsString(Content);
-
-	TSharedPtr<FTextToSpeechSynthesizeDelegate> Delegate = MakeShareable(new FTextToSpeechSynthesizeDelegate);
-	TSharedPtr<FSynthesisProgress> Progress = MakeShareable(new FSynthesisProgress(Delegate));
-	PendingSynthesisRequests.Add(HttpRequest, Progress);
 	HttpRequest->OnRequestProgress().BindUObject(this, &UTextToSpeech::OnSynthesizeProgress);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UTextToSpeech::OnSynthesizeComplete);
-	HttpRequest->ProcessRequest();
-	return Delegate;
+
+	TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = MakeShareable(new FTextToSpeechSynthesizePendingRequest);
+	PendingSynthesisRequests.Add(HttpRequest, Delegate);
+	Delegate->HttpRequest = HttpRequest;
+	Delegate->Response = MakeShareable(new FTextToSpeechSynthesizeResponse);
+	return Delegate.Get();
 }
 
 void UTextToSpeech::OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived)
 {
-	TSharedPtr<FSynthesisProgress>* ProgressPtr = PendingSynthesisRequests.Find(Request);
-	if (ProgressPtr != nullptr)
+	TSharedPtr<FTextToSpeechSynthesizePendingRequest>* DelegatePtr = PendingSynthesisRequests.Find(Request);
+	if (DelegatePtr != nullptr)
 	{
-		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
-		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioLength = BytesReceived;
+		TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
+		Delegate->Response->audioLength = BytesReceived;
 	}	
 }
 
 void UTextToSpeech::OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	TSharedPtr<FSynthesisProgress>* ProgressPtr = PendingSynthesisRequests.Find(Request);
-	if (ProgressPtr != nullptr)
+	TSharedPtr<FTextToSpeechSynthesizePendingRequest>* DelegatePtr = PendingSynthesisRequests.Find(Request);
+	if (DelegatePtr == nullptr)
 	{
-		TSharedPtr<FSynthesisProgress> Progress = *ProgressPtr;
-		TSharedPtr<FSynthesizeResponse> SynthesisResponse = Progress->Response;
-		SynthesisResponse->audioData = TArray<uint8>(Response->GetContent());
-		Progress->Delegate.Get()->ExecuteIfBound(SynthesisResponse, nullptr);
-		PendingSynthesisRequests.Remove(Request);
+		return;
 	}
+
+	TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
+	if (!bWasSuccessful)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		PendingSynthesisRequests.Remove(Request);
+		return;
+	}
+
+	if (Response->GetResponseCode() != 200)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
+		PendingSynthesisRequests.Remove(Request);
+		return;
+	}
+
+	Delegate->Response->audioData = TArray<uint8>(Response->GetContent());
+	Delegate->OnSuccess.ExecuteIfBound(Delegate->Response);
+	PendingSynthesisRequests.Remove(Request);
 }

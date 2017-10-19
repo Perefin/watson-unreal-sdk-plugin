@@ -3,18 +3,18 @@
 #include "SynthesizeDataModel.generated.h"
 
 USTRUCT()
-struct FSynthesizeRequest
+struct FTextToSpeechSynthesizeRequest
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
 	FString text;
 	
-	FSynthesizeRequest() {}
+	FTextToSpeechSynthesizeRequest() {}
 };
 
 USTRUCT()
-struct FSynthesizeResponse
+struct FTextToSpeechSynthesizeResponse
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -24,11 +24,11 @@ struct FSynthesizeResponse
 	UPROPERTY()
 	uint32 audioLength;
 	
-	FSynthesizeResponse() {}
+	FTextToSpeechSynthesizeResponse() {}
 };
 
 USTRUCT()
-struct FSynthesizeError
+struct FTextToSpeechSynthesizeError
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -38,14 +38,20 @@ struct FSynthesizeError
 	UPROPERTY()
 	int32 code;
 	
-	FSynthesizeError() {}
+	FTextToSpeechSynthesizeError() {}
 };
 
-DECLARE_DELEGATE_TwoParams(FTextToSpeechSynthesizeDelegate, TSharedPtr<FSynthesizeResponse>, TSharedPtr<FSynthesizeError>)
-struct FSynthesisProgress
+
+DECLARE_DELEGATE_OneParam(FTextToSpeechSynthesizeSuccessDelegate, TSharedPtr<FTextToSpeechSynthesizeResponse>)
+DECLARE_DELEGATE_OneParam(FTextToSpeechSynthesizeFailureDelegate, FString)
+struct FTextToSpeechSynthesizePendingRequest
 {
-	TSharedPtr<FSynthesizeResponse> Response;
-	TSharedPtr<FTextToSpeechSynthesizeDelegate> Delegate;
-	FSynthesisProgress() {}
-	FSynthesisProgress(TSharedPtr<FTextToSpeechSynthesizeDelegate> Delegate) : Response(MakeShareable(new FSynthesizeResponse)), Delegate(Delegate) {}
+	TSharedPtr<IHttpRequest> HttpRequest;
+	TSharedPtr<FTextToSpeechSynthesizeResponse> Response;
+	FTextToSpeechSynthesizeSuccessDelegate OnSuccess;
+	FTextToSpeechSynthesizeFailureDelegate OnFailure;
+	void Send()
+	{
+		HttpRequest->ProcessRequest();
+	}
 };

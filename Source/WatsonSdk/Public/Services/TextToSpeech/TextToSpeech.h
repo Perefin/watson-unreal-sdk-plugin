@@ -22,7 +22,7 @@ public:
 	// Synthesize Audio
 
 private:
-	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FSynthesisProgress>> PendingSynthesisRequests;
+	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FTextToSpeechSynthesizePendingRequest>> PendingSynthesisRequests;
 	void OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived);
 
@@ -33,6 +33,6 @@ public:
 	* @param Request		The text to be synthesized
 	* @return				Delegate called when the request is complete with the audio stream
 	*/
-	TSharedPtr<FTextToSpeechSynthesizeDelegate> Synthesize(const FSynthesizeRequest& Request, const FString& Voice = FString("en-US_MichaelVoice"));
+	FTextToSpeechSynthesizePendingRequest* Synthesize(const FTextToSpeechSynthesizeRequest& Request, const FString& Voice = FString("en-US_MichaelVoice"));
 
 };
