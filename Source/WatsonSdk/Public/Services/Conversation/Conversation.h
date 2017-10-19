@@ -8,9 +8,6 @@
 #include "MessageDataModel.h"
 #include "Conversation.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FConversationMessageDelegate, TSharedPtr<FConversationMessageResponse>, TSharedPtr<FConversationMessageError>)
-
-
 UCLASS()
 class WATSONSDK_API UConversation : public UObject
 {
@@ -25,7 +22,7 @@ public:
 	// Send Message
 
 private:
-	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FConversationMessageDelegate>> PendingMessageRequests;
+	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FConversationMessagePendingRequest>> PendingMessageRequests;
 	void OnMessageComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	
 public:
@@ -36,5 +33,5 @@ public:
 	 * @param Message		A MessageRequest object that provides the input text and optional context.
 	 * @return				Returns the last user input, the recognized intents and entities, and the updated context and system output.
 	 */
-	TSharedPtr<FConversationMessageDelegate> Message(const FString& Workspace, const FConversationMessageRequest& Message);
+	FConversationMessagePendingRequest* Message(const FString& Workspace, const FConversationMessageRequest& Message);
 };

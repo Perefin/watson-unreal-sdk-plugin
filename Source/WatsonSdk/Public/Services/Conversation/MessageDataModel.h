@@ -3,18 +3,18 @@
 #include "MessageDataModel.generated.h"
 
 USTRUCT()
-struct FConversationContext
+struct FConversationMessageContext
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
 	FString conversation_id;
 	
-	FConversationContext() {}
+	FConversationMessageContext() {}
 };
 
 USTRUCT()
-struct FConversationRuntimeIntent
+struct FConversationMessageRuntimeIntent
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -24,11 +24,11 @@ struct FConversationRuntimeIntent
 	UPROPERTY()
 	float confidence;
 	
-	FConversationRuntimeIntent() {}
+	FConversationMessageRuntimeIntent() {}
 };
 
 USTRUCT()
-struct FConversationRuntimeEntity
+struct FConversationMessageRuntimeEntity
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -44,11 +44,11 @@ struct FConversationRuntimeEntity
 	UPROPERTY()
 	float confidence;
 	
-	FConversationRuntimeEntity() {}
+	FConversationMessageRuntimeEntity() {}
 };
 
 USTRUCT()
-struct FConversationLogMessage
+struct FConversationMessageLogMessage
 {
 	GENERATED_USTRUCT_BODY()
 	
@@ -58,16 +58,16 @@ struct FConversationLogMessage
 	UPROPERTY()
 	FString msg;
 	
-	FConversationLogMessage() {}
+	FConversationMessageLogMessage() {}
 };
 
 USTRUCT()
-struct FConversationOutputData
+struct FConversationMessageOutputData
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	TArray<FConversationLogMessage> log_messages;
+	TArray<FConversationMessageLogMessage> log_messages;
 	
 	UPROPERTY()
 	TArray<FString> text;
@@ -75,18 +75,18 @@ struct FConversationOutputData
 	UPROPERTY()
 	TArray<FString> nodes_visited;
 	
-	FConversationOutputData() {}
+	FConversationMessageOutputData() {}
 };
 
 USTRUCT()
-struct FConversationInputData
+struct FConversationMessageInputData
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
 	FString text;
 	
-	FConversationInputData() {}
+	FConversationMessageInputData() {}
 };
 
 USTRUCT()
@@ -95,23 +95,23 @@ struct FConversationMessageRequest
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY()
-	FConversationInputData input;
+	FConversationMessageInputData input;
 	
 	UPROPERTY()
 	bool alternate_intents;
 	
 	UPROPERTY()
-	FConversationContext context;
+	FConversationMessageContext context;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeEntity> entities;
+	TArray<FConversationMessageRuntimeEntity> entities;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeIntent> intents;
+	TArray<FConversationMessageRuntimeIntent> intents;
 	
 	UPROPERTY()
-	
-	FConversationOutputData output;
+	FConversationMessageOutputData output;
+
 	FConversationMessageRequest() {}
 };
 
@@ -135,19 +135,19 @@ struct FConversationMessageResponse
 	FConversationMessageInput input;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeIntent> intents;
+	TArray<FConversationMessageRuntimeIntent> intents;
 	
 	UPROPERTY()
-	TArray<FConversationRuntimeEntity> entities;
+	TArray<FConversationMessageRuntimeEntity> entities;
 	
 	UPROPERTY()
 	bool alternate_intents;
 	
 	UPROPERTY()
-	FConversationContext context;
+	FConversationMessageContext context;
 	
 	UPROPERTY()
-	FConversationOutputData output;
+	FConversationMessageOutputData output;
 	
 	FConversationMessageResponse() {}
 };
@@ -178,4 +178,17 @@ struct FConversationMessageError
 	TArray<FConversationMessageErrorDetail> errors;
 	
 	FConversationMessageError() {}
+};
+
+DECLARE_DELEGATE_OneParam(FConversationMessageSuccessDelegate, TSharedPtr<FConversationMessageResponse>)
+DECLARE_DELEGATE_OneParam(FConversationMessageFailureDelegate, FString)
+struct FConversationMessagePendingRequest
+{
+	TSharedPtr<IHttpRequest> HttpRequest;
+	FConversationMessageSuccessDelegate OnSuccess;
+	FConversationMessageFailureDelegate OnFailure;
+	void Send()
+	{
+		HttpRequest->ProcessRequest();
+	}
 };

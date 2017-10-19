@@ -13,37 +13,57 @@ UConversation::UConversation()
 //////////////////////////////////////////////////////////////////////////
 // Send Message
 
-TSharedPtr<FConversationMessageDelegate> UConversation::Message(const FString& Workspace, const FConversationMessageRequest& Message)
+FConversationMessagePendingRequest* UConversation::Message(const FString& Workspace, const FConversationMessageRequest& Message)
 {
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(FConversationMessageRequest::StaticStruct(), &Message, Content, 0, 0);
 
-	TSharedPtr<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
 	HttpRequest->SetURL(Configuration.Url + "workspaces/" + Workspace + "/message?version=" + Configuration.Version);
 	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
 	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
 	HttpRequest->SetContentAsString(Content);
-
-	TSharedPtr<FConversationMessageDelegate> Delegate = MakeShareable(new FConversationMessageDelegate);
-	PendingMessageRequests.Add(HttpRequest, Delegate);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UConversation::OnMessageComplete);
-	HttpRequest->ProcessRequest();
-	return Delegate;
+
+	TSharedPtr<FConversationMessagePendingRequest> PendingRequest = MakeShareable(new FConversationMessagePendingRequest);
+	PendingMessageRequests.Add(HttpRequest, PendingRequest);
+	PendingRequest->HttpRequest = HttpRequest;
+	return PendingRequest.Get();
 }
 
 void UConversation::OnMessageComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	TSharedPtr<FConversationMessageDelegate>* DelegatePtr = PendingMessageRequests.Find(Request);
-	if (DelegatePtr != nullptr)
+	TSharedPtr<FConversationMessagePendingRequest>* DelegatePtr = PendingMessageRequests.Find(Request);
+	if (DelegatePtr == nullptr)
 	{
-		TSharedPtr<FConversationMessageResponse> MessageResponse = MakeShareable(new FConversationMessageResponse);
-		FString SerializedResponseBody(Response->GetContentAsString());
-		FJsonObjectConverter::JsonObjectStringToUStruct<FConversationMessageResponse>(SerializedResponseBody, MessageResponse.Get(), 0, 0);
-
-		TSharedPtr<FConversationMessageDelegate> Delegate = *DelegatePtr;
-		Delegate.Get()->ExecuteIfBound(MessageResponse, nullptr);
-		PendingMessageRequests.Remove(Request);
+		return;
 	}
+
+	TSharedPtr<FConversationMessagePendingRequest> Delegate = *DelegatePtr;
+	if (!bWasSuccessful)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		PendingMessageRequests.Remove(Request);
+		return;
+	}
+
+	if (Response->GetResponseCode() != 200)
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
+		PendingMessageRequests.Remove(Request);
+		return;
+	}
+	
+	TSharedPtr<FConversationMessageResponse> MessageResponse = MakeShareable(new FConversationMessageResponse);
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FConversationMessageResponse>(Response->GetContentAsString(), MessageResponse.Get(), 0, 0))
+	{
+		Delegate->OnFailure.ExecuteIfBound(FString("Could not deserialize: ") + Response->GetContentAsString());
+		PendingMessageRequests.Remove(Request);
+		return;
+	}
+
+	Delegate->OnSuccess.ExecuteIfBound(MessageResponse);
+	PendingMessageRequests.Remove(Request);
 }
