@@ -46,27 +46,19 @@ void UTextToSpeech::OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSen
 void UTextToSpeech::OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	TSharedPtr<FTextToSpeechSynthesizePendingRequest>* DelegatePtr = PendingSynthesisRequests.Find(Request);
-	if (DelegatePtr == nullptr)
+	if (DelegatePtr != nullptr)
 	{
-		return;
-	}
-
-	TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
-	if (!bWasSuccessful)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
+		FString ErrorMessage;
+		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
+		{
+			Delegate->Response->audioData = TArray<uint8>(Response->GetContent());
+			Delegate->OnSuccess.ExecuteIfBound(Delegate->Response);
+		}
+		else
+		{
+			Delegate->OnFailure.ExecuteIfBound(ErrorMessage);
+		}
 		PendingSynthesisRequests.Remove(Request);
-		return;
 	}
-
-	if (Response->GetResponseCode() != 200)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
-		PendingSynthesisRequests.Remove(Request);
-		return;
-	}
-
-	Delegate->Response->audioData = TArray<uint8>(Response->GetContent());
-	Delegate->OnSuccess.ExecuteIfBound(Delegate->Response);
-	PendingSynthesisRequests.Remove(Request);
 }

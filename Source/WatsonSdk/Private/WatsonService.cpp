@@ -25,6 +25,24 @@ void UWatsonService::SetVersion(FString Version)
 }
 
 
+bool UWatsonService::IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, class FString& OutMessage)
+{
+	if (!bWasSuccessful)
+	{
+		OutMessage = "Request was not successful.";
+		return false;
+	}
+	else if (Response->GetResponseCode() != 200)
+	{
+		OutMessage = "Request failed: " + Response->GetContentAsString();
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Json Serializers & Deserializers

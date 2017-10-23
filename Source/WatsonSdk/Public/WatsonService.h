@@ -1,9 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Common/Authentication.h"
+#include "Http.h"
 #include "JsonObject.h"
 #include "JsonObjectConverter.h"
+#include "Common/Authentication.h"
 #include "WatsonService.generated.h"
 
 UCLASS()
@@ -19,6 +20,8 @@ public:
 	void SetVersion(FString Version);
 
 protected:
+	bool IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, FString& OutMessage);
+
 	FString JsonObjectToString(const TSharedPtr<FJsonObject> JsonObject);
 
 	TSharedPtr<FJsonObject> StringToJsonObject(const FString& String);

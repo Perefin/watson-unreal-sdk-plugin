@@ -32,28 +32,19 @@ FSpeechToTextRecognizePendingRequest* USpeechToText::Recognize(TArray<uint8> Aud
 void USpeechToText::OnRecognizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	TSharedPtr<FSpeechToTextRecognizePendingRequest>* DelegatePtr = PendingRecognizeRequests.Find(Request);
-	if (DelegatePtr == nullptr)
+	if (DelegatePtr != nullptr)
 	{
-		return;
-	}
-
-	TSharedPtr<FSpeechToTextRecognizePendingRequest> Delegate = *DelegatePtr;
-	if (!bWasSuccessful)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		TSharedPtr<FSpeechToTextRecognizePendingRequest> Delegate = *DelegatePtr;
+		FString ErrorMessage;
+		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
+		{
+			TSharedPtr<FSpeechToTextRecognizeResponse> ResponseStruct = StringToStruct<FSpeechToTextRecognizeResponse>(Response->GetContentAsString());
+			Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
+		}
+		else
+		{
+			Delegate->OnFailure.ExecuteIfBound(ErrorMessage);
+		}
 		PendingRecognizeRequests.Remove(Request);
-		return;
 	}
-
-	if (Response->GetResponseCode() != 200)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
-		PendingRecognizeRequests.Remove(Request);
-		return;
-	}
-
-	TSharedPtr<FSpeechToTextRecognizeResponse> ResponseStruct = StringToStruct<FSpeechToTextRecognizeResponse>(Response->GetContentAsString());
-	Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
-	PendingRecognizeRequests.Remove(Request);
 }
-

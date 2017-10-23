@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Services/Conversation/Conversation.h"
-#include "JsonObjectConverter.h"
 
 UConversation::UConversation()
 {
@@ -15,9 +14,20 @@ UConversation::UConversation()
 
 FConversationMessagePendingRequest* UConversation::Message(const FString& Workspace, const FConversationMessageRequest& Message)
 {
-	// Message context is a dynamic object.
 	TSharedPtr<FJsonObject> MessageJson = StructToJsonObject<FConversationMessageRequest>(Message);
+	
+	// Message context is a dynamic object.
 	MessageJson->SetObjectField("context", Message.context);
+
+	// Don't serialize empty lists.
+	if (Message.intents.Num() == 0)
+	{
+		MessageJson->RemoveField("intents");
+	}
+	if (Message.entities.Num() == 0)
+	{
+		MessageJson->RemoveField("entities");
+	}
 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
@@ -37,29 +47,21 @@ FConversationMessagePendingRequest* UConversation::Message(const FString& Worksp
 void UConversation::OnMessageComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	TSharedPtr<FConversationMessagePendingRequest>* DelegatePtr = PendingMessageRequests.Find(Request);
-	if (DelegatePtr == nullptr)
+	if (DelegatePtr != nullptr)
 	{
-		return;
-	}
-
-	TSharedPtr<FConversationMessagePendingRequest> Delegate = *DelegatePtr;
-	if (!bWasSuccessful)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request not successful."));
+		TSharedPtr<FConversationMessagePendingRequest> Delegate = *DelegatePtr;
+		FString ErrorMessage;
+		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
+		{
+			TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+			TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
+			ResponseStruct->context = ResponseJson->GetObjectField("context");
+			Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
+		}
+		else
+		{
+			Delegate->OnFailure.ExecuteIfBound(ErrorMessage);
+		}
 		PendingMessageRequests.Remove(Request);
-		return;
 	}
-
-	if (Response->GetResponseCode() != 200)
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Request failed: ") + Response->GetContentAsString());
-		PendingMessageRequests.Remove(Request);
-		return;
-	}
-
-	TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-	TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
-	ResponseStruct->context = ResponseJson->GetObjectField("context");
-	Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
-	PendingMessageRequests.Remove(Request);
 }

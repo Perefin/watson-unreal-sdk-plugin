@@ -87,7 +87,7 @@ struct FConversationMessageRequest
 	FConversationMessageInputData input;
 	
 	UPROPERTY()
-	bool alternate_intents;
+	bool alternate_intents = false;
 	
 	UPROPERTY()
 	TArray<FConversationMessageRuntimeEntity> entities;
