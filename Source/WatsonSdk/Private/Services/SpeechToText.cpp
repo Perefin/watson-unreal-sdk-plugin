@@ -5,9 +5,9 @@
 
 USpeechToText::USpeechToText()
 {
-	Configuration.Url = "https://stream.watsonplatform.net/speech-to-text/api/v1/";
-	Configuration.UserAgent = "X-UnrealEngine-Agent";
-	Configuration.Version = "2017-05-26";
+	SetUrl("https://stream.watsonplatform.net/speech-to-text/api/v1/");
+	SetUserAgent("X-UnrealEngine-Agent");
+	SetVersion("2017-05-26");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -17,10 +17,10 @@ FSpeechToTextRecognizePendingRequest* USpeechToText::Recognize(TArray<uint8> Aud
 {
 	TSharedPtr<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
-	HttpRequest->SetURL(Configuration.Url + "recognize?model=" + AudioModel);
-	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
+	HttpRequest->SetURL(ServiceUrl + "recognize?model=" + AudioModel);
+	HttpRequest->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("audio/l16;rate=16000;channels=1;"));
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	HttpRequest->SetContent(AudioData);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &USpeechToText::OnRecognizeComplete);
 

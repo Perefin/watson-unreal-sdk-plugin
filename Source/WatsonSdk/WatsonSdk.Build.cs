@@ -35,7 +35,8 @@ public class WatsonSdk : ModuleRules
                 "OnlineSubsystem",
                 "OnlineSubsystemNull",
                 "OnlineSubsystemUtils",
-                "Voice"
+                "Voice",
+                "WebSockets",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -46,7 +47,6 @@ public class WatsonSdk : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
-                "WebSockets",
 				//"Slate",
                 //"SlateCore",
 

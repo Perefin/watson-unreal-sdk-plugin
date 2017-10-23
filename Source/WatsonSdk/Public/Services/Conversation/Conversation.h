@@ -3,23 +3,22 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "Json.h"
-#include "Common/Authorization.h"
-#include "Common/Configuration.h"
+#include "WatsonService.h"
 #include "MessageDataModel.h"
 #include "Conversation.generated.h"
 
 UCLASS()
-class WATSONSDK_API UConversation : public UObject
+class WATSONSDK_API UConversation : public UWatsonService
 {
 	GENERATED_BODY()
 
 public:
-	FAuthorization Authorization;
-	FConfiguration Configuration;
 	UConversation();
 
-	//////////////////////////////////////////////////////////////////////////
-	// Send Message
+
+
+//////////////////////////////////////////////////////////////////////////
+// Send Message
 
 private:
 	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FConversationMessagePendingRequest>> PendingMessageRequests;

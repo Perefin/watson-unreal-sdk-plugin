@@ -10,14 +10,14 @@ class WATSONSDK_API USpeaker : public UObject
 {
 	GENERATED_BODY()
 
+public:
+	USpeaker();
+	void PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLength);
+
 private:
 	UPROPERTY()
 	UAudioComponent* AudioOutputComponent;
 	
 	UPROPERTY()
 	USoundWaveProcedural* AudioPCMComponent;
-
-public:
-	USpeaker();
-	void PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLength);
 };

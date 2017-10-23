@@ -3,23 +3,22 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "Json.h"
-#include "Common/Authorization.h"
-#include "Common/Configuration.h"
+#include "WatsonService.h"
 #include "SynthesizeDataModel.h"
 #include "TextToSpeech.generated.h"
 
 UCLASS()
-class WATSONSDK_API UTextToSpeech : public UObject
+class WATSONSDK_API UTextToSpeech : public UWatsonService
 {
 	GENERATED_BODY()
 
 public:
-	FAuthorization Authorization;
-	FConfiguration Configuration;
 	UTextToSpeech();
 
-	//////////////////////////////////////////////////////////////////////////
-	// Synthesize Audio
+
+
+//////////////////////////////////////////////////////////////////////////
+// Synthesize Audio
 
 private:
 	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FTextToSpeechSynthesizePendingRequest>> PendingSynthesisRequests;

@@ -5,9 +5,9 @@
 
 UConversation::UConversation()
 {
-	Configuration.Url = "https://gateway.watsonplatform.net/conversation/api/v1/";
-	Configuration.UserAgent = "X-UnrealEngine-Agent";
-	Configuration.Version = "2017-05-26";
+	SetUrl("https://gateway.watsonplatform.net/conversation/api/v1/");
+	SetUserAgent("X-UnrealEngine-Agent");
+	SetVersion("2017-05-26");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -20,10 +20,10 @@ FConversationMessagePendingRequest* UConversation::Message(const FString& Worksp
 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
-	HttpRequest->SetURL(Configuration.Url + "workspaces/" + Workspace + "/message?version=" + Configuration.Version);
-	HttpRequest->SetHeader(TEXT("User-Agent"), Configuration.UserAgent);
+	HttpRequest->SetURL(ServiceUrl + "workspaces/" + Workspace + "/message?version=" + ServiceVersion);
+	HttpRequest->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
-	HttpRequest->SetHeader(TEXT("Authorization"), Authorization.Encode());
+	HttpRequest->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	HttpRequest->SetContentAsString(Content);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UConversation::OnMessageComplete);
 
