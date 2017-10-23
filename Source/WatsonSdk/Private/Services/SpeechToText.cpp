@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Services/SpeechToText/SpeechToText.h"
-#include "JsonObjectConverter.h"
 
 USpeechToText::USpeechToText()
 {
@@ -53,15 +52,8 @@ void USpeechToText::OnRecognizeComplete(FHttpRequestPtr Request, FHttpResponsePt
 		return;
 	}
 
-	TSharedPtr<FSpeechToTextRecognizeResponse> RecognizeResponse = MakeShareable(new FSpeechToTextRecognizeResponse);
-	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FSpeechToTextRecognizeResponse>(Response->GetContentAsString(), RecognizeResponse.Get(), 0, 0))
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Could not deserialize: ") + Response->GetContentAsString());
-		PendingRecognizeRequests.Remove(Request);
-		return;
-	}
-
-	Delegate->OnSuccess.ExecuteIfBound(RecognizeResponse);
+	TSharedPtr<FSpeechToTextRecognizeResponse> ResponseStruct = StringToStruct<FSpeechToTextRecognizeResponse>(Response->GetContentAsString());
+	Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
 	PendingRecognizeRequests.Remove(Request);
 }
 

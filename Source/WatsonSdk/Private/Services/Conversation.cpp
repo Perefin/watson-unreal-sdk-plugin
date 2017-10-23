@@ -15,8 +15,9 @@ UConversation::UConversation()
 
 FConversationMessagePendingRequest* UConversation::Message(const FString& Workspace, const FConversationMessageRequest& Message)
 {
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(FConversationMessageRequest::StaticStruct(), &Message, Content, 0, 0);
+	// Message context is a dynamic object.
+	TSharedPtr<FJsonObject> MessageJson = StructToJsonObject<FConversationMessageRequest>(Message);
+	MessageJson->SetObjectField("context", Message.context);
 
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
@@ -24,7 +25,7 @@ FConversationMessagePendingRequest* UConversation::Message(const FString& Worksp
 	HttpRequest->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
 	HttpRequest->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
-	HttpRequest->SetContentAsString(Content);
+	HttpRequest->SetContentAsString(JsonObjectToString(MessageJson));
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UConversation::OnMessageComplete);
 
 	TSharedPtr<FConversationMessagePendingRequest> PendingRequest = MakeShareable(new FConversationMessagePendingRequest);
@@ -55,15 +56,10 @@ void UConversation::OnMessageComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 		PendingMessageRequests.Remove(Request);
 		return;
 	}
-	
-	TSharedPtr<FConversationMessageResponse> MessageResponse = MakeShareable(new FConversationMessageResponse);
-	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FConversationMessageResponse>(Response->GetContentAsString(), MessageResponse.Get(), 0, 0))
-	{
-		Delegate->OnFailure.ExecuteIfBound(FString("Could not deserialize: ") + Response->GetContentAsString());
-		PendingMessageRequests.Remove(Request);
-		return;
-	}
 
-	Delegate->OnSuccess.ExecuteIfBound(MessageResponse);
+	TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+	TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
+	ResponseStruct->context = ResponseJson->GetObjectField("context");
+	Delegate->OnSuccess.ExecuteIfBound(ResponseStruct);
 	PendingMessageRequests.Remove(Request);
 }

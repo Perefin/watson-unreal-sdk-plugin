@@ -15,9 +15,6 @@ UTextToSpeech::UTextToSpeech()
 
 FTextToSpeechSynthesizePendingRequest* UTextToSpeech::Synthesize(const FTextToSpeechSynthesizeRequest& Request, const FString& Voice)
 {
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(FTextToSpeechSynthesizeRequest::StaticStruct(), &Request, Content, 0, 0);
-
 	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetVerb("POST");
 	HttpRequest->SetURL(ServiceUrl + "synthesize?voice=" + Voice);
@@ -25,7 +22,7 @@ FTextToSpeechSynthesizePendingRequest* UTextToSpeech::Synthesize(const FTextToSp
 	HttpRequest->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
 	HttpRequest->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
-	HttpRequest->SetContentAsString(Content);
+	HttpRequest->SetContentAsString(StructToString<FTextToSpeechSynthesizeRequest>(Request));
 	HttpRequest->OnRequestProgress().BindUObject(this, &UTextToSpeech::OnSynthesizeProgress);
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UTextToSpeech::OnSynthesizeComplete);
 

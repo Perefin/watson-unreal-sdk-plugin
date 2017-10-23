@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Common/Authentication.h"
+#include "JsonObject.h"
+#include "JsonObjectConverter.h"
 #include "WatsonService.generated.h"
 
 UCLASS()
@@ -17,6 +19,22 @@ public:
 	void SetVersion(FString Version);
 
 protected:
+	FString JsonObjectToString(const TSharedPtr<FJsonObject> JsonObject);
+
+	TSharedPtr<FJsonObject> StringToJsonObject(const FString& String);
+
+	template<typename T>
+	FString StructToString(const T& Struct);
+
+	template<typename T>
+	TSharedPtr<T> StringToStruct(const FString& String);
+
+	template<typename T>
+	TSharedPtr<FJsonObject> StructToJsonObject(const T& Struct);
+
+	template<typename T>
+	TSharedPtr<T> JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject);
+
 	UPROPERTY()
 	FAuthentication ServiceAuthentication;
 	

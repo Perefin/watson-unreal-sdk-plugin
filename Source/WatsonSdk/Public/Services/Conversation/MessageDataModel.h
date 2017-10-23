@@ -3,17 +3,6 @@
 #include "MessageDataModel.generated.h"
 
 USTRUCT()
-struct FConversationMessageContext
-{
-	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString conversation_id;
-	
-	FConversationMessageContext() {}
-};
-
-USTRUCT()
 struct FConversationMessageRuntimeIntent
 {
 	GENERATED_USTRUCT_BODY()
@@ -101,9 +90,6 @@ struct FConversationMessageRequest
 	bool alternate_intents;
 	
 	UPROPERTY()
-	FConversationMessageContext context;
-	
-	UPROPERTY()
 	TArray<FConversationMessageRuntimeEntity> entities;
 	
 	UPROPERTY()
@@ -111,6 +97,8 @@ struct FConversationMessageRequest
 	
 	UPROPERTY()
 	FConversationMessageOutputData output;
+
+	TSharedPtr<FJsonObject> context;
 
 	FConversationMessageRequest() {}
 };
@@ -144,10 +132,9 @@ struct FConversationMessageResponse
 	bool alternate_intents;
 	
 	UPROPERTY()
-	FConversationMessageContext context;
-	
-	UPROPERTY()
 	FConversationMessageOutputData output;
+
+	TSharedPtr<FJsonObject> context;
 	
 	FConversationMessageResponse() {}
 };
