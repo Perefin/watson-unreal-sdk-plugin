@@ -5,7 +5,7 @@
 2. Add the following module dependencies to your project's <code>.Build.cs</code>
 ```csharp
   PrivateDependencyModuleNames.AddRange(new string[] {
-    "WatsonSDK",
+    "WatsonSdk",
     "Voice"
   });
 ```
