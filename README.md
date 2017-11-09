@@ -1,6 +1,7 @@
 # watson-sdk-plugin
 
 ## Setup
+0. Ensure you are running Unreal Engine 4.18
 1. Clone the plugin to your project's <code>Plugins/</code> directory
 2. Add the following module dependencies to your project's <code>.Build.cs</code>
 ```csharp
@@ -14,7 +15,7 @@
   [OnlineSubsystem]
   DefaultPlatformService=Null
   bHasVoiceEnabled=true
-  
+
   [Voice]
   bEnabled=true
 ```
@@ -96,7 +97,7 @@ class WATSONSDKTESTBED_API AMyActor : public APawn
 {
 	GENERATED_BODY()
 
-public:	 
+public:
 	AMyActor();
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
@@ -105,7 +106,7 @@ public:
 protected:
 	// Speaker
 	UPROPERTY() USpeaker* MySpeaker;
-	
+
 	// Microphone
 	UPROPERTY() UMicrophone* MyMicrophone;
 	void OnMicrophoneStart();
@@ -114,7 +115,7 @@ protected:
 	// Watson
 	UPROPERTY() UWatson* MyWatson;
 
-	// Conversation	
+	// Conversation
 	UPROPERTY() UConversation* MyConversation;
 	TSharedPtr<FConversationMessageResponse> LastResponse;
 	void OnConversationMessage(TSharedPtr<FConversationMessageResponse> Response);
@@ -180,7 +181,7 @@ void AMyActor::OnMicrophoneStop()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Microphone Stopping..."));
 	MyMicrophone->StopRecording();
-	
+
 	// Make Speech To Text Request
 	FSpeechToTextRecognizePendingRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
 	Request->OnSuccess.BindUObject(this, &AMyActor::OnSpeechToTextRecognize);
@@ -191,7 +192,7 @@ void AMyActor::OnMicrophoneStop()
 void AMyActor::OnConversationMessage(TSharedPtr<FConversationMessageResponse> Response)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), *Response->output.text.Last());
-	
+
 	LastResponse = Response;
 
 	// Make Text To Speech Request
