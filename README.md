@@ -148,9 +148,9 @@ AMyPawn::AMyPawn()
 	MySpeaker = CreateDefaultSubobject<USpeaker>(TEXT("Speaker"));
 	MyMicrophone = CreateDefaultSubobject<UMicrophone>(TEXT("Microphone"));
 
-	MyConversation = MyWatson->CreateConversation(FAuthentication("f1eeed67-c6ad-4a58-a5bd-e0c05f542949", "xHAVHLnYjeUz"));
-	MyTextToSpeech = MyWatson->CreateTextToSpeech(FAuthentication("f6cba252-5c58-43e8-a40c-8d1cd2d184ba", "lGEkbFTiaDDw"));
-	MySpeechToText = MyWatson->CreateSpeechToText(FAuthentication("970ef92d-ce9e-4734-8f5e-e258f9c53275", "xsfnJXmVVNQ2"));
+	MyConversation = MyWatson->CreateConversation(FAuthentication("ENTER WATSON SERVICE CREDENTIALS HERE"));
+	MyTextToSpeech = MyWatson->CreateTextToSpeech(FAuthentication("ENTER WATSON SERVICE CREDENTIALS HERE"));
+	MySpeechToText = MyWatson->CreateSpeechToText(FAuthentication("970ef92d-xxxxxxxxxxxxxxx", "xxxxxxXXXXXX"));
 }
 
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* InputComponent)
