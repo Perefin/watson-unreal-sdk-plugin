@@ -1,7 +1,13 @@
 # watson-sdk-plugin
 
+## Before you Begin
+Ensure that you have the following prerequisites:
+
+* An IBM Cloud account. If you don't have one, [sign up](https://console.bluemix.net/registration/).
+* Download Unreal Engine 4.18. 
+
+
 ## Setup
-0. Ensure you are running Unreal Engine 4.18
 1. Clone the plugin to your project's <code>Plugins/</code> directory
 2. Add the following module dependencies to your project's <code>.Build.cs</code>
 ```csharp
