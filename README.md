@@ -97,6 +97,7 @@ MyMicrophone->GetRecording();
 #include "Common/Microphone.h"
 #include "MyPawn.generated.h"
 
+//Enter Your Project Name Below
 UCLASS()
 class <YOURPROJECTNAME_API> AMyPawn : public APawn
 {
