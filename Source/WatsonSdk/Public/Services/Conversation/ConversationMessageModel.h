@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageDataModel.generated.h"
+#include "ConversationMessageModel.generated.h"
 
 USTRUCT()
 struct FConversationMessageRuntimeIntent
@@ -139,43 +139,12 @@ struct FConversationMessageResponse
 	FConversationMessageResponse() {}
 };
 
+
+DECLARE_DELEGATE_OneParam(FConversationMessageSuccess, TSharedPtr<FConversationMessageResponse>)
 USTRUCT()
-struct FConversationMessageErrorDetail
+struct FConversationMessagePendingRequest : public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString message;
-	
-	UPROPERTY()
-	FString path;
-	
-	FConversationMessageErrorDetail() {}
-};
-
-USTRUCT()
-struct FConversationMessageError
-{
-	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString error;
-	
-	UPROPERTY()
-	TArray<FConversationMessageErrorDetail> errors;
-	
-	FConversationMessageError() {}
-};
-
-DECLARE_DELEGATE_OneParam(FConversationMessageSuccessDelegate, TSharedPtr<FConversationMessageResponse>)
-DECLARE_DELEGATE_OneParam(FConversationMessageFailureDelegate, FString)
-struct FConversationMessagePendingRequest
-{
-	TSharedPtr<IHttpRequest> HttpRequest;
-	FConversationMessageSuccessDelegate OnSuccess;
-	FConversationMessageFailureDelegate OnFailure;
-	void Send()
-	{
-		HttpRequest->ProcessRequest();
-	}
+	FConversationMessageSuccess OnSuccess;
+	FConversationMessagePendingRequest() {}
 };
