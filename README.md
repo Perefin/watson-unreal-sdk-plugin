@@ -98,7 +98,7 @@ MyMicrophone->GetRecording();
 #include "MyPawn.generated.h"
 
 UCLASS()
-class WATSONSDKTESTBED_API AMyPawn : public APawn
+class <YOURPROJECTNAME_API> AMyPawn : public APawn
 {
 	GENERATED_BODY()
 
@@ -147,7 +147,7 @@ protected:
 
 AMyPawn::AMyPawn()
 {
-	PrimaryPawnTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	MyWatson = CreateDefaultSubobject<UWatson>(TEXT("Watson"));
