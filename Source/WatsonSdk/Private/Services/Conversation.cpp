@@ -135,7 +135,7 @@ FConversationListCounterexamplesRequest* UConversation::ListCounterexamples(cons
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/counterexamples";
 	FString Query = "?version=" + ServiceVersion;
 	Query += (IncludeCount ? "&include_count=true" : "&include_count=false");
-	Query += ("&page_limit=" + PageLimit);
+	Query += ("&page_limit=" + FString::FromInt(PageLimit));
 	Query += ("&sort=" + Sort);
 
 	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
@@ -180,7 +180,7 @@ FConversationListEntitiesRequest* UConversation::ListEntities(const FString& Wor
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities";
 	FString Query = "?version=" + ServiceVersion;
 	Query += (DoExport ? "&export=true" : "&export=false");
-	Query += ("&page_limit=" + PageLimit);
+	Query += ("&page_limit=" + FString::FromInt(PageLimit));
 	Query += (IncludeCount ? "&include_count=true" : "&include_count=false");
 	Query += ("&sort=" + Sort);
 

@@ -13,7 +13,6 @@
 3. Add the following to your engine config <code>DefaultEngine.ini</code>
 ```
   [OnlineSubsystem]
-  DefaultPlatformService=Null
   bHasVoiceEnabled=true
 
   [Voice]
@@ -36,8 +35,8 @@ FConversationMessageRequest ConversationRequest;
 ConversationRequest.input.text = "Hello there, how are you?";
 
 FConversationMessagePendingRequest* Request = MyConversation->Message("1a2cdfcd-e42a-43f7-947c-ba44ebf4f2af", ConversationRequest);
-Request->OnSuccess.BindUObject(this, &AMyActor::OnConversationMessage);
-Request->OnFailure.BindUObject(this, &AMyActor::OnConversationFailure);
+Request->OnSuccess.BindUObject(this, &AMyPawn::OnConversationMessage);
+Request->OnFailure.BindUObject(this, &AMyPawn::OnConversationFailure);
 Request->Send();
 ```
 ### Watson Speech To Text
@@ -47,8 +46,8 @@ USpeechToText* MySpeechToText = MyWatson->CreateSpeechToText(FAuthentication(/* 
 
 // Create and send request
 FSpeechToTextRecognizePendingRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
-Request->OnSuccess.BindUObject(this, &AMyActor::OnSpeechToTextRecognize);
-Request->OnFailure.BindUObject(this, &AMyActor::OnSpeechToTextFailure);
+Request->OnSuccess.BindUObject(this, &AMyPawn::OnSpeechToTextRecognize);
+Request->OnFailure.BindUObject(this, &AMyPawn::OnSpeechToTextFailure);
 Request->Send();
 ```
 ### Watson Text To Speech
@@ -61,8 +60,8 @@ FTextToSpeechSynthesizeRequest SynthesisRequest;
 SynthesisRequest.text = "Hello there, how are you?";
 
 FTextToSpeechSynthesizePendingRequest* T2sRequest = MyTextToSpeech->Synthesize(SynthesisRequest, "en-US_AllisonVoice");
-T2sRequest->OnSuccess.BindUObject(this, &AMyActor::OnTextToSpeechSynthesize);
-T2sRequest->OnFailure.BindUObject(this, &AMyActor::OnTextToSpeechFailure);
+T2sRequest->OnSuccess.BindUObject(this, &AMyPawn::OnTextToSpeechSynthesize);
+T2sRequest->OnFailure.BindUObject(this, &AMyPawn::OnTextToSpeechFailure);
 T2sRequest->Send();
 ```
 ### Speaker
@@ -80,9 +79,9 @@ MyMicrophone->StopRecording();
 MyMicrophone->GetRecording();
 ```
 
-## Sample Actor
+## Sample Pawn
 
-### MyActor.h
+### MyPawn.h
 ```cpp
 #pragma once
 #include "CoreMinimal.h"
@@ -90,15 +89,15 @@ MyMicrophone->GetRecording();
 #include "Watson.h"
 #include "Common/Speaker.h"
 #include "Common/Microphone.h"
-#include "MyActor.generated.h"
+#include "MyPawn.generated.h"
 
 UCLASS()
-class WATSONSDKTESTBED_API AMyActor : public APawn
+class WATSONSDKTESTBED_API AMyPawn : public APawn
 {
 	GENERATED_BODY()
 
 public:
-	AMyActor();
+	AMyPawn();
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void SetupPlayerInputComponent(class UInputComponent* InputComponent);
@@ -133,16 +132,16 @@ protected:
 };
 ```
 
-### MyActor.cpp
+### MyPawn.cpp
 ``` cpp
 // Here's a snippet that allows you to converse with Watson Conversation using Speech-To-Text & Text-To-Speech.
 // Make sure to create a Microphone Action Mapping for push-to-talk behavior.
 
-#include "MyActor.h"
+#include "MyPawn.h"
 
-AMyActor::AMyActor()
+AMyPawn::AMyPawn()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryPawnTick.bCanEverTick = true;
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
 	MyWatson = CreateDefaultSubobject<UWatson>(TEXT("Watson"));
@@ -154,42 +153,42 @@ AMyActor::AMyActor()
 	MySpeechToText = MyWatson->CreateSpeechToText(FAuthentication("970ef92d-ce9e-4734-8f5e-e258f9c53275", "xsfnJXmVVNQ2"));
 }
 
-void AMyActor::SetupPlayerInputComponent(UInputComponent* InputComponent)
+void AMyPawn::SetupPlayerInputComponent(UInputComponent* InputComponent)
 {
 	Super::SetupPlayerInputComponent(InputComponent);
-	InputComponent->BindAction("Microphone", IE_Pressed, this, &AMyActor::OnMicrophoneStart);
-	InputComponent->BindAction("Microphone", IE_Released, this, &AMyActor::OnMicrophoneStop);
+	InputComponent->BindAction("Microphone", IE_Pressed, this, &AMyPawn::OnMicrophoneStart);
+	InputComponent->BindAction("Microphone", IE_Released, this, &AMyPawn::OnMicrophoneStop);
 }
 
-void AMyActor::BeginPlay()
+void AMyPawn::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void AMyActor::Tick(float DeltaTime)
+void AMyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void AMyActor::OnMicrophoneStart()
+void AMyPawn::OnMicrophoneStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Microphone Starting..."));
 	MyMicrophone->StartRecording();
 }
 
-void AMyActor::OnMicrophoneStop()
+void AMyPawn::OnMicrophoneStop()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Microphone Stopping..."));
 	MyMicrophone->StopRecording();
 
 	// Make Speech To Text Request
 	FSpeechToTextRecognizePendingRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
-	Request->OnSuccess.BindUObject(this, &AMyActor::OnSpeechToTextRecognize);
-	Request->OnFailure.BindUObject(this, &AMyActor::OnSpeechToTextFailure);
+	Request->OnSuccess.BindUObject(this, &AMyPawn::OnSpeechToTextRecognize);
+	Request->OnFailure.BindUObject(this, &AMyPawn::OnSpeechToTextFailure);
 	Request->Send();
 }
 
-void AMyActor::OnConversationMessage(TSharedPtr<FConversationMessageResponse> Response)
+void AMyPawn::OnConversationMessage(TSharedPtr<FConversationMessageResponse> Response)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), *Response->output.text.Last());
 
@@ -200,17 +199,17 @@ void AMyActor::OnConversationMessage(TSharedPtr<FConversationMessageResponse> Re
 	SynthesisRequest.text = Response->output.text.Last();
 
 	FTextToSpeechSynthesizePendingRequest* T2sRequest = MyTextToSpeech->Synthesize(SynthesisRequest, "en-US_AllisonVoice");
-	T2sRequest->OnSuccess.BindUObject(this, &AMyActor::OnTextToSpeechSynthesize);
-	T2sRequest->OnFailure.BindUObject(this, &AMyActor::OnTextToSpeechFailure);
+	T2sRequest->OnSuccess.BindUObject(this, &AMyPawn::OnTextToSpeechSynthesize);
+	T2sRequest->OnFailure.BindUObject(this, &AMyPawn::OnTextToSpeechFailure);
 	T2sRequest->Send();
 }
 
-void AMyActor::OnConversationFailure(FString Error)
+void AMyPawn::OnConversationFailure(FString Error)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Conversation Error: %s"), *Error);
 }
 
-void AMyActor::OnSpeechToTextRecognize(TSharedPtr<FSpeechToTextRecognizeResponse> Response)
+void AMyPawn::OnSpeechToTextRecognize(TSharedPtr<FSpeechToTextRecognizeResponse> Response)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Speech To Text Success: %s"), *Response->results[0].alternatives[0].transcript);
 
@@ -224,22 +223,22 @@ void AMyActor::OnSpeechToTextRecognize(TSharedPtr<FSpeechToTextRecognizeResponse
 	}
 
 	FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2cdfcd-e42a-43f7-947c-ba44ebf4f2af", ConversationRequest);
-	ConvRequest->OnSuccess.BindUObject(this, &AMyActor::OnConversationMessage);
-	ConvRequest->OnFailure.BindUObject(this, &AMyActor::OnConversationFailure);
+	ConvRequest->OnSuccess.BindUObject(this, &AMyPawn::OnConversationMessage);
+	ConvRequest->OnFailure.BindUObject(this, &AMyPawn::OnConversationFailure);
 	ConvRequest->Send();
 }
 
-void AMyActor::OnSpeechToTextFailure(FString Error)
+void AMyPawn::OnSpeechToTextFailure(FString Error)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Speech To Text Error: %s"), *Error);
 }
 
-void AMyActor::OnTextToSpeechSynthesize(TSharedPtr<FTextToSpeechSynthesizeResponse> Response)
+void AMyPawn::OnTextToSpeechSynthesize(TSharedPtr<FTextToSpeechSynthesizeResponse> Response)
 {
 	MySpeaker->PlayAudio(Response->audioData, Response->audioLength);
 }
 
-void AMyActor::OnTextToSpeechFailure(FString Error)
+void AMyPawn::OnTextToSpeechFailure(FString Error)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Text To Speech Error: %s"), *Error);
 }
