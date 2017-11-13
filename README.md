@@ -60,7 +60,7 @@ The credentials for each service contain either a `username`, `password` and end
 **WARNING:** You are responsible for securing your own credentials. Any user with your service credentials can access your service instances!
 
 ## Create Microphone Action Mapping
-1. Edit - > Project Settings -> Input -> Action Mapping -> Choose a name -> Choose a microphone hotkey -> Close
+1. Edit -> Project Settings -> Input -> Bindings -> Action Mapping -> Choose a name -> Choose a microphone hotkey -> Close
 
 
 ## Usage
