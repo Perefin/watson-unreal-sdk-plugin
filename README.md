@@ -1,22 +1,28 @@
-# watson-sdk-plugin
+# Watson SDK Plugin
 
 ## Before you Begin
 Ensure that you have the following prerequisites:
 
 * An IBM Cloud account. If you don't have one, [sign up](https://console.bluemix.net/registration/).
-* Download Unreal Engine 4.18. 
-
+* Unreal Engine 4.18. 
 
 ## Setup
-1. Clone the plugin to your project's <code>Plugins/</code> directory
-2. Add the following module dependencies to your project's <code>.Build.cs</code>
+1. If it doesn't exist already, create <code>Plugins/</code> folder in your project's directory
+2. Clone the plugin to your project's <code>Plugins/</code> directory
+3. In Unreal Engine 4, Create Pawn C++ Class
+4. Add Sample Pawn Code to MyPawn.h 
+	* Replace <code>YOURPROJECTNAME</code> in <code>class <YOURPROJECTNAME_API></code> with your project name. (ex: <code>class WATSONUNREALENGINEPROJECT_API</code>)
+5. Add Sample Pawn Code to MyPawn.cpp
+	* Insert your IBM Cloud credentials in the following format: <code>"username","password"</code>
+	_Note: See Configure your service credentials below_
+6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YOURPROJECTNAME.Build.cs</code>)
 ```csharp
   PrivateDependencyModuleNames.AddRange(new string[] {
     "WatsonSdk",
     "Voice"
   });
 ```
-3. Add the following to your engine config <code>DefaultEngine.ini</code>
+7. Add the following to your engine config <code>DefaultEngine.ini</code>
 ```
   [OnlineSubsystem]
   bHasVoiceEnabled=true
@@ -24,6 +30,38 @@ Ensure that you have the following prerequisites:
   [Voice]
   bEnabled=true
 ```
+8. Compile
+9. If you want a trigger key, Create Microphone Action Mapping
+10. Place Pawn in environment
+
+## Configure your service credentials
+To create instances of Watson services and their credentials, follow the steps below.
+
+**Note:** Service credentials are different from your IBM Cloud account username and password.
+
+1. Determine which services to configure.
+1. If you have configured the services already, complete the following steps. Otherwise, go to step 3.
+    1. Log in to Bluemix at https://bluemix.net.
+    1. Click the service you would like to use.
+    1. Click **Service credentials**.
+    1. Click **View credentials** to access your credentials.
+1. If you need to configure the services that you want to use, complete the following steps.
+    1. Log in to Bluemix at https://bluemix.net.
+    1. Click the **Create service** button.
+    1. Under **Watson**, select which service you would like to create an instance of and click that service.
+    1. Give the service and credential a name. Select a plan and click the **Create** button on the bottom.
+    4. Click **Service Credentials**.
+    5. Click **View credentials** to access your credentials.
+1. Paste your credentials in the matching line item in the MyPawn.cpp file
+1. Your service credentials can be used to instantiate Watson Services within your application. Most services also support tokens which you can instantiate the service with as well.
+
+The credentials for each service contain either a `username`, `password` and endpoint `url` **or** an `apikey` and endpoint `url`.
+
+**WARNING:** You are responsible for securing your own credentials. Any user with your service credentials can access your service instances!
+
+## Create Microphone Action Mapping
+1. Edit - > Project Settings -> Input -> Action Mapping -> Choose a name -> Choose a microphone hotkey -> Close
+
 
 ## Usage
 ### Watson
@@ -85,7 +123,7 @@ MyMicrophone->StopRecording();
 MyMicrophone->GetRecording();
 ```
 
-## Sample Pawn
+## Sample Pawn Code
 
 ### MyPawn.h
 ```cpp
