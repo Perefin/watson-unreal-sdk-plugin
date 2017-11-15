@@ -15,6 +15,8 @@ Ensure that you have the following prerequisites:
 5. Add Sample Pawn Code to MyPawn.cpp
 	* Insert your IBM Cloud credentials in the following format: <code>"username","password"</code>
 	_Note: See Configure your service credentials below_
+	* Insert Watson Conversation Workspace ID into <code>FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);</code>
+	_Note: See Configure your Watson Conversation Workspace ID below_
 6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YOURPROJECTNAME.Build.cs</code>)
 ```csharp
   PrivateDependencyModuleNames.AddRange(new string[] {
@@ -58,6 +60,14 @@ To create instances of Watson services and their credentials, follow the steps b
 The credentials for each service contain either a `username`, `password` and endpoint `url` **or** an `apikey` and endpoint `url`.
 
 **WARNING:** You are responsible for securing your own credentials. Any user with your service credentials can access your service instances!
+
+##Configure your Watson Conversation Workspace ID
+1. Log in to Bluemix at https://bluemix.net
+1. Go to Watson Conversation
+1. Launch Conversation Tool by clicking Launch Tool
+1. Click on the settings icon (three dots) on the Workspace you want to use
+1. Click View Details
+1. Copy & Past Workspace ID into MyPawn.cpp
 
 ## Create Microphone Action Mapping
 1. Edit -> Project Settings -> Input -> Bindings -> Action Mapping -> Choose a name -> Choose a microphone hotkey -> Close
@@ -266,8 +276,8 @@ void AMyPawn::OnSpeechToTextRecognize(TSharedPtr<FSpeechToTextRecognizeResponse>
 		ConversationRequest.context = LastResponse->context;
 		ConversationRequest.output = LastResponse->output;
 	}
-
-	FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2cdfcd-e42a-43f7-947c-ba44ebf4f2af", ConversationRequest);
+// Replace string with Workspace ID in IBM Cloud Conversation
+	FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);
 	ConvRequest->OnSuccess.BindUObject(this, &AMyPawn::OnConversationMessage);
 	ConvRequest->OnFailure.BindUObject(this, &AMyPawn::OnConversationFailure);
 	ConvRequest->Send();
