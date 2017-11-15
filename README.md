@@ -70,7 +70,7 @@ The credentials for each service contain either a `username`, `password` and end
 1. Copy & Past Workspace ID into MyPawn.cpp
 
 ## Create Microphone Action Mapping
-1. Edit -> Project Settings -> Input -> Bindings -> Action Mapping -> Choose a name -> Choose a microphone hotkey -> Close
+1. Edit -> Project Settings -> Input -> Bindings -> Action Mapping -> Name = <code>Microphone</code> -> Choose a microphone hotkey -> Close
 
 
 ## Usage
