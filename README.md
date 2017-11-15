@@ -61,7 +61,7 @@ The credentials for each service contain either a `username`, `password` and end
 
 **WARNING:** You are responsible for securing your own credentials. Any user with your service credentials can access your service instances!
 
-##Configure your Watson Conversation Workspace ID
+## Configure your Watson Conversation Workspace ID
 1. Log in to Bluemix at https://bluemix.net
 1. Go to Watson Conversation
 1. Launch Conversation Tool by clicking Launch Tool
