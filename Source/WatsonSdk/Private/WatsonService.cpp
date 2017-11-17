@@ -26,7 +26,7 @@ void UWatsonService::SetVersion(FString Version)
 
 
 //////////////////////////////////////////////////////////////////////////
-// Json Serializers & Deserializers
+// Json Helpers
 
 FString UWatsonService::JsonObjectToString(const TSharedPtr<FJsonObject> JsonObject)
 {
@@ -76,55 +76,21 @@ TSharedPtr<T> UWatsonService::JsonObjectToStruct(const TSharedPtr<FJsonObject> J
 	return Result;
 }
 
+template<typename T>
+void UWatsonService::RemoveJsonArrayIfEmpty(FJsonObject* JsonObject, const FString& Field, const TArray<T>& Array)
+{
+	if (Array.Num() == 0 && JsonObject != nullptr)
+	{
+		JsonObject->RemoveField(Field);
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Http Request Helpers
 
-TSharedPtr<IHttpRequest> UWatsonService::CreateRequest(FString Verb, FString Path)
-{
-	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	Request->SetVerb(Verb);
-	Request->SetURL(Path);
-	return Request;
-}
-
-void UWatsonService::AddHeader(IHttpRequest* Request, FString HeaderName, FString HeaderValue, bool AddIfEmptyString)
-{
-	if (AddIfEmptyString || !HeaderValue.IsEmpty())
-	{
-		Request->SetHeader(HeaderName, HeaderValue);
-	}
-}
-
-void UWatsonService::AddQuery(IHttpRequest* Request, FString QueryName, FString QueryValue, bool AddIfEmptyString)
-{
-	if (AddIfEmptyString || !QueryValue.IsEmpty())
-	{
-		FString Original = Request->GetURL();
-		Request->SetURL(Original + QueryName + "=" + QueryValue + "&");
-	}
-}
-
-bool UWatsonService::IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, class FString& OutMessage)
-{
-	if (!bWasSuccessful)
-	{
-		OutMessage = "Request was not successful.";
-		return false;
-	}
-	else if (Response->GetResponseCode() != 200)
-	{
-		OutMessage = "Request failed: " + Response->GetContentAsString();
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
 template<typename T>
-T* UWatsonService::NewWatsonRequest(TSharedPtr<IHttpRequest> Request)
+T* UWatsonService::CreateWatsonRequest(TSharedPtr<IHttpRequest> Request)
 {
 	TSharedPtr<T> WatsonRequest = MakeShareable(new T);
 	Requests.Add(Request, WatsonRequest);
@@ -133,25 +99,47 @@ T* UWatsonService::NewWatsonRequest(TSharedPtr<IHttpRequest> Request)
 }
 
 template<typename T>
-T* UWatsonService::GetWatsonRequest(TSharedPtr<IHttpRequest> Request)
+bool UWatsonService::ValidateWatsonRequest(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, T*& OutWatsonRequest, FString& OutMessage)
 {
+	OutWatsonRequest = nullptr;
+
 	TSharedPtr<FWatsonRequest>* WatsonRequestPtr = Requests.Find(Request);
 	if (WatsonRequestPtr == nullptr)
 	{
-		return nullptr;
+		OutMessage = "Request not registered.";
+		return false;
 	}
 
 	FWatsonRequest* WatsonRequest = WatsonRequestPtr->Get();
 	if (WatsonRequest == nullptr)
 	{
-		return nullptr;
+		OutMessage = "Request not registered.";
+		return false;
 	}
 
 	T* CastWatsonRequest = (T*) WatsonRequest;
 	if (CastWatsonRequest == nullptr)
 	{
-		return nullptr;
+		OutMessage = "Derived request type not valid.";
+		return false;
 	}
 
-	return CastWatsonRequest;
+	OutWatsonRequest = CastWatsonRequest;
+	if (!bWasSuccessful)
+	{
+		OutWatsonRequest = CastWatsonRequest;
+		OutMessage = "Request was not successful.";
+		return false;
+	}
+
+	if (Response->GetResponseCode() != 200)
+	{
+		OutMessage = "Request failed: " + Response->GetContentAsString();
+		return false;
+	}
+	else
+	{
+		OutMessage = "Success!";
+		return true;
+	}
 }

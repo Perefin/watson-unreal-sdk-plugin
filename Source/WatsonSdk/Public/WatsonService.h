@@ -26,7 +26,7 @@ struct FWatsonRequest
 UCLASS()
 class WATSONSDK_API UWatsonService : public UObject
 {
-GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
 	UWatsonService();
@@ -37,7 +37,7 @@ public:
 
 protected:
 	//////////////////////////////////////////////////////////////////////////
-	// Json Serializers & Deserializers
+	// Json Helpers
 
 	FString JsonObjectToString(const TSharedPtr<FJsonObject> JsonObject);
 
@@ -54,24 +54,19 @@ protected:
 
 	template<typename T>
 	TSharedPtr<T> JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject);
+	
+	template<typename T>
+	void RemoveJsonArrayIfEmpty(FJsonObject* JsonObject, const FString& Field, const TArray<T>& Array);
 
 
 	//////////////////////////////////////////////////////////////////////////
 	// Http Request Helpers
 
-	TSharedPtr<IHttpRequest> CreateRequest(FString Verb, FString Path);
-
-	void AddHeader(IHttpRequest* Request, FString HeaderName, FString HeaderValue, bool AddIfEmptyString = false);
-
-	void AddQuery(IHttpRequest* Request, FString QueryName, FString QueryValue, bool AddIfEmptyString = false);
+	template<typename T>
+	T* CreateWatsonRequest(TSharedPtr<IHttpRequest> Request);
 
 	template<typename T>
-	T* NewWatsonRequest(TSharedPtr<IHttpRequest> Request);
-
-	template<typename T>
-	T* GetWatsonRequest(TSharedPtr<IHttpRequest> Request);
-
-	bool IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, FString& OutMessage);
+	bool ValidateWatsonRequest(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, T*& OutWatsonRequest, FString& OutMessage);
 
 
 	//////////////////////////////////////////////////////////////////////////

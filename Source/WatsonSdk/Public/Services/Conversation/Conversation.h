@@ -31,10 +31,10 @@ public:
 	FConversationGetCounterexampleRequest* GetCounterexample(const FString& WorkspaceId, const FString& UrlEncodedText);
 	FConversationListEntitiesRequest* ListEntities(const FString& WorkspaceId, bool DoExport = false, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
 	FConversationGetEntityRequest* GetEntity(const FString& WorkspaceId, const FString& Entity, bool DoExport = false);
-	//FConversationListValuesRequest* ListValues(const FString& WorkspaceId, const FString& Entity, bool DoExport = false, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
-	//FConversationGetValueRequest* GetValue(const FString& WorkspaceId, const FString& Entity, const FString& Value, bool DoExport = false);
-	//FConversationListSynonymsRequest* ListSynonyms(const FString& WorkspaceId, const FString& Entity, const FString& Value, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
-	//FConversationGetSynonymRequest* GetSynonym(const FString& WorkspaceId, const FString& Entity, const FString& Value, const FString& Synonym);
+	FConversationListValuesRequest* ListValues(const FString& WorkspaceId, const FString& Entity, bool DoExport = false, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
+	FConversationGetValueRequest* GetValue(const FString& WorkspaceId, const FString& Entity, const FString& Value, bool DoExport = false);
+	FConversationListSynonymsRequest* ListSynonyms(const FString& WorkspaceId, const FString& Entity, const FString& Value, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
+	FConversationGetSynonymRequest* GetSynonym(const FString& WorkspaceId, const FString& Entity, const FString& Value, const FString& Synonym);
 	//FConversationListIntentsRequest* ListIntents(const FString& WorkspaceId, bool DoExport = false, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
 	//FConversationGetIntentRequest* GetIntent(const FString& WorkspaceId, const FString& Intent, bool DoExport = false);
 	//FConversationListExamplesRequest* ListExamples(const FString& WorkspaceId, const FString& Intent, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");
@@ -43,9 +43,6 @@ public:
 	//FConversationGetDialogNodeRequest* GetDialogNode(const FString& WorkspaceId, const FString& DialogNode);
 
 private:
-	template<typename RequestType, typename ResponseType>
-	void DefaultOnResponseHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnListWorkspaces(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnGetWorkspace(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -53,10 +50,10 @@ private:
 	void OnGetCounterexample(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnListEntities(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnGetEntity(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	//void OnListValues(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	//void OnGetValue(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	//void OnListSynonyms(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	//void OnGetSynonym(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnListValues(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnGetValue(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnListSynonyms(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnGetSynonym(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	//void OnListIntents(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	//void OnGetIntent(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	//void OnListExamples(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);

@@ -9,77 +9,44 @@ UConversation::UConversation()
 	SetVersion("2017-05-26");
 }
 
-template<typename RequestType, typename ResponseType>
-void UConversation::DefaultOnResponseHandler(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	RequestType* CastWatsonRequest = GetWatsonRequest<RequestType>(Request);
-	if (CastWatsonRequest != nullptr)
-	{
-		FString ErrorMessage;
-		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
-		{
-			TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-			TSharedPtr<ResponseType> ResponseStruct = JsonObjectToStruct<ResponseType>(ResponseJson);
-			CastWatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
-		}
-		else
-		{
-			CastWatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
-		}
-	}
-	Requests.Remove(Request);
-}
-
 //////////////////////////////////////////////////////////////////////////
 // Send Message
 
 FConversationMessagePendingRequest* UConversation::Message(const FString& WorkspaceId, const FConversationMessageRequest& Message)
 {
 	TSharedPtr<FJsonObject> MessageJson = StructToJsonObject<FConversationMessageRequest>(Message);
-
-	// Message context is a dynamic object.
 	MessageJson->SetObjectField("context", Message.context);
-
-	// Don't serialize empty lists.
-	if (Message.intents.Num() == 0)
-	{
-		MessageJson->RemoveField("intents");
-	}
-	if (Message.entities.Num() == 0)
-	{
-		MessageJson->RemoveField("entities");
-	}
+	RemoveJsonArrayIfEmpty(MessageJson.Get(), "intents", Message.intents);
+	RemoveJsonArrayIfEmpty(MessageJson.Get(), "entities", Message.entities);
 
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/message";
-	FString Query = "?version=" + ServiceVersion;
+	Path += ("?version=" + ServiceVersion);
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("POST", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("POST");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->SetContentAsString(JsonObjectToString(MessageJson));
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnMessage);
-	return NewWatsonRequest<FConversationMessagePendingRequest>(Request);
+	return CreateWatsonRequest<FConversationMessagePendingRequest>(Request);
 }
 
 void UConversation::OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	FConversationMessagePendingRequest* CastWatsonRequest = GetWatsonRequest<FConversationMessagePendingRequest>(Request);
-	if (CastWatsonRequest != nullptr)
+	FString ErrorMessage;
+	FConversationMessagePendingRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
-		FString ErrorMessage;
-		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
-		{
-			TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-			TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
-			// Message context is a dynamic object.
-			ResponseStruct->context = ResponseJson->GetObjectField("context");
-			CastWatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
-		}
-		else
-		{
-			CastWatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
-		}
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
+		ResponseStruct->context = ResponseJson->GetObjectField("context");
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
 	}
 	Requests.Remove(Request);
 }
@@ -90,19 +57,33 @@ void UConversation::OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response
 FConversationListWorkspacesRequest* UConversation::ListWorkspaces()
 {
 	FString Path = ServiceUrl + "workspaces";
-	FString Query = "?version=" + ServiceVersion;
+	Path += ("?version=" + ServiceVersion);
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListWorkspaces);
-	return NewWatsonRequest<FConversationListWorkspacesRequest>(Request);
+	return CreateWatsonRequest<FConversationListWorkspacesRequest>(Request);
 }
 
 void UConversation::OnListWorkspaces(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationListWorkspacesRequest, FConversationWorkspaceList>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationListWorkspacesRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationWorkspaceList> ResponseStruct = JsonObjectToStruct<FConversationWorkspaceList>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -111,20 +92,34 @@ void UConversation::OnListWorkspaces(FHttpRequestPtr Request, FHttpResponsePtr R
 FConversationGetWorkspaceRequest* UConversation::GetWorkspace(const FString& WorkspaceId, bool DoExport)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId;
-	FString Query = "?version=" + ServiceVersion;
-	Query += (DoExport ? "&export=true" : "&export=false");
+	Path += ("?version=" + ServiceVersion);
+	Path += (DoExport ? "&export=true" : "&export=false");
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnGetWorkspace);
-	return NewWatsonRequest<FConversationGetWorkspaceRequest>(Request);
+	return CreateWatsonRequest<FConversationGetWorkspaceRequest>(Request);
 }
 
 void UConversation::OnGetWorkspace(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationGetWorkspaceRequest, FConversationWorkspace>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationGetWorkspaceRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationWorkspace> ResponseStruct = JsonObjectToStruct<FConversationWorkspace>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -133,22 +128,36 @@ void UConversation::OnGetWorkspace(FHttpRequestPtr Request, FHttpResponsePtr Res
 FConversationListCounterexamplesRequest* UConversation::ListCounterexamples(const FString& WorkspaceId, int32 PageLimit, bool IncludeCount, const FString& Sort)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/counterexamples";
-	FString Query = "?version=" + ServiceVersion;
-	Query += (IncludeCount ? "&include_count=true" : "&include_count=false");
-	Query += ("&page_limit=" + FString::FromInt(PageLimit));
-	Query += ("&sort=" + Sort);
-
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	Path += ("?version=" + ServiceVersion);
+	Path += (IncludeCount ? "&include_count=true" : "&include_count=false");
+	Path += ("&page_limit=" + FString::FromInt(PageLimit));
+	Path += ("&sort=" + Sort);
+	
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListCounterexamples);
-	return NewWatsonRequest<FConversationListCounterexamplesRequest>(Request);
+	return CreateWatsonRequest<FConversationListCounterexamplesRequest>(Request);
 }
 
 void UConversation::OnListCounterexamples(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationListCounterexamplesRequest, FConversationCounterexampleList>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationListCounterexamplesRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationCounterexampleList> ResponseStruct = JsonObjectToStruct<FConversationCounterexampleList>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -157,19 +166,33 @@ void UConversation::OnListCounterexamples(FHttpRequestPtr Request, FHttpResponse
 FConversationGetCounterexampleRequest* UConversation::GetCounterexample(const FString& WorkspaceId, const FString& UrlEncodedText)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/counterexamples/" + UrlEncodedText;
-	FString Query = "?version=" + ServiceVersion;
+	Path += ("?version=" + ServiceVersion);
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnGetCounterexample);
-	return NewWatsonRequest<FConversationGetCounterexampleRequest>(Request);
+	return CreateWatsonRequest<FConversationGetCounterexampleRequest>(Request);
 }
 
 void UConversation::OnGetCounterexample(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationGetCounterexampleRequest, FConversationCounterexample>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationGetCounterexampleRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationCounterexample> ResponseStruct = JsonObjectToStruct<FConversationCounterexample>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -178,23 +201,37 @@ void UConversation::OnGetCounterexample(FHttpRequestPtr Request, FHttpResponsePt
 FConversationListEntitiesRequest* UConversation::ListEntities(const FString& WorkspaceId, bool DoExport, int32 PageLimit, bool IncludeCount, const FString& Sort)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities";
-	FString Query = "?version=" + ServiceVersion;
-	Query += (DoExport ? "&export=true" : "&export=false");
-	Query += ("&page_limit=" + FString::FromInt(PageLimit));
-	Query += (IncludeCount ? "&include_count=true" : "&include_count=false");
-	Query += ("&sort=" + Sort);
+	Path += ("?version=" + ServiceVersion);
+	Path += (DoExport ? "&export=true" : "&export=false");
+	Path += ("&page_limit=" + FString::FromInt(PageLimit));
+	Path += (IncludeCount ? "&include_count=true" : "&include_count=false");
+	Path += ("&sort=" + Sort);
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListEntities);
-	return NewWatsonRequest<FConversationListEntitiesRequest>(Request);
+	return CreateWatsonRequest<FConversationListEntitiesRequest>(Request);
 }
 
 void UConversation::OnListEntities(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationListEntitiesRequest, FConversationEntityList>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationListEntitiesRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationEntityList> ResponseStruct = JsonObjectToStruct<FConversationEntityList>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,18 +240,180 @@ void UConversation::OnListEntities(FHttpRequestPtr Request, FHttpResponsePtr Res
 FConversationGetEntityRequest* UConversation::GetEntity(const FString& WorkspaceId, const FString& Entity, bool DoExport)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity;
-	FString Query = "?version=" + ServiceVersion;
-	Query += (DoExport ? "&export=true" : "&export=false");
+	Path += ("?version=" + ServiceVersion);
+	Path += (DoExport ? "&export=true" : "&export=false");
 
-	TSharedPtr<IHttpRequest> Request = CreateRequest("GET", Path + Query);
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
 	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
 	Request->SetHeader(TEXT("Content-Type"), "application/json");
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListCounterexamples);
-	return NewWatsonRequest<FConversationGetEntityRequest>(Request);
+	return CreateWatsonRequest<FConversationGetEntityRequest>(Request);
 }
 
 void UConversation::OnGetEntity(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	DefaultOnResponseHandler<FConversationGetEntityRequest, FConversationEntity>(Request, Response, bWasSuccessful);
+	FString ErrorMessage;
+	FConversationGetEntityRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationEntity> ResponseStruct = JsonObjectToStruct<FConversationEntity>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// List Values
+
+FConversationListValuesRequest* UConversation::ListValues(const FString& WorkspaceId, const FString& Entity, bool DoExport, int32 PageLimit, bool IncludeCount, const FString& Sort)
+{
+	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity + "/values";
+	Path += ("?version=" + ServiceVersion);
+	Path += (DoExport ? "&export=true" : "&export=false");
+	Path += ("&page_limit=" + FString::FromInt(PageLimit));
+	Path += (IncludeCount ? "&include_count=true" : "&include_count=false");
+	Path += ("&sort=" + Sort);
+
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
+	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
+	Request->SetHeader(TEXT("Content-Type"), "application/json");
+	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
+	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListValues);
+	return CreateWatsonRequest<FConversationListValuesRequest>(Request);
+}
+
+void UConversation::OnListValues(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorMessage;
+	FConversationListValuesRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationValueList> ResponseStruct = JsonObjectToStruct<FConversationValueList>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Get Value
+
+FConversationGetValueRequest* UConversation::GetValue(const FString& WorkspaceId, const FString& Entity, const FString& Value, bool DoExport)
+{
+	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity + "/values/" + Value;
+	Path += ("?version=" + ServiceVersion);
+	Path += (DoExport ? "&export=true" : "&export=false");
+
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
+	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
+	Request->SetHeader(TEXT("Content-Type"), "application/json");
+	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
+	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnGetValue);
+	return CreateWatsonRequest<FConversationGetValueRequest>(Request);
+}
+
+void UConversation::OnGetValue(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorMessage;
+	FConversationGetValueRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationValue> ResponseStruct = JsonObjectToStruct<FConversationValue>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// List Synonyms
+
+FConversationListSynonymsRequest* UConversation::ListSynonyms(const FString& WorkspaceId, const FString& Entity, const FString& Value, int32 PageLimit = 100, bool IncludeCount, const FString& Sort)
+{
+	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity + "/values/" + Value + "/synonyms";
+	Path += ("?version=" + ServiceVersion);
+	Path += ("&page_limit=" + FString::FromInt(PageLimit));
+	Path += (IncludeCount ? "&include_count=true" : "&include_count=false");
+	Path += ("&sort=" + Sort);
+
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
+	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
+	Request->SetHeader(TEXT("Content-Type"), "application/json");
+	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
+	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnListSynonyms);
+	return CreateWatsonRequest<FConversationListSynonymsRequest>(Request);
+}
+
+void UConversation::OnListSynonyms(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorMessage;
+	FConversationListSynonymsRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationSynonymList> ResponseStruct = JsonObjectToStruct<FConversationSynonymList>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Get Synonym
+
+FConversationGetSynonymRequest* UConversation::GetSynonym(const FString& WorkspaceId, const FString& Entity, const FString& Value, const FString& Synonym)
+{
+	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity + "/values/" + Value + "/synonyms/" + Synonym;
+	Path += ("?version=" + ServiceVersion);
+
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(Path);
+	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
+	Request->SetHeader(TEXT("Content-Type"), "application/json");
+	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
+	Request->OnProcessRequestComplete().BindUObject(this, &UConversation::OnGetSynonym);
+	return CreateWatsonRequest<FConversationGetSynonymRequest>(Request);
+}
+
+void UConversation::OnGetSynonym(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorMessage;
+	FConversationGetSynonymRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
+		TSharedPtr<FConversationSynonym> ResponseStruct = JsonObjectToStruct<FConversationSynonym>(ResponseJson);
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
