@@ -66,7 +66,13 @@ protected:
 	T* CreateWatsonRequest(TSharedPtr<IHttpRequest> Request);
 
 	template<typename T>
+	T* RetrieveWatsonRequest(const FHttpRequestPtr& Request);
+
+	template<typename T>
 	bool ValidateWatsonRequest(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, T*& OutWatsonRequest, FString& OutMessage);
+
+	/* Deprecated */
+    bool IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, FString& OutMessage);
 
 
 	//////////////////////////////////////////////////////////////////////////

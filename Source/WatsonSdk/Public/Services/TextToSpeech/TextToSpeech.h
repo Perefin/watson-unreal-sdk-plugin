@@ -4,7 +4,7 @@
 #include "Http.h"
 #include "Json.h"
 #include "WatsonService.h"
-#include "SynthesizeDataModel.h"
+#include "TextToSpeechSynthesizeModel.h"
 #include "TextToSpeech.generated.h"
 
 UCLASS()
@@ -15,23 +15,9 @@ class WATSONSDK_API UTextToSpeech : public UWatsonService
 public:
 	UTextToSpeech();
 
-
-
-//////////////////////////////////////////////////////////////////////////
-// Synthesize Audio
+	FTextToSpeechSynthesizeAudioRequest* SynthesizeAudio(const FString& Text, const FString& Voice = "en-US_MichaelVoice", const FString& CustomizationId = "", const FString& Accept = "audio/l16;rate=16000;channels=1;");
 
 private:
-	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FTextToSpeechSynthesizePendingRequest>> PendingSynthesisRequests;
-	void OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived);
-
-public:
-	/**
-	* Synthesizes text to spoken audio, returning the synthesized audio stream as an array of bytes. 
-	*
-	* @param Request		The text to be synthesized
-	* @return				Delegate called when the request is complete with the audio stream
-	*/
-	FTextToSpeechSynthesizePendingRequest* Synthesize(const FTextToSpeechSynthesizeRequest& Request, const FString& Voice = FString("en-US_MichaelVoice"));
-
+	void OnSynthesizeAudio(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnSynthesizeAudioProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived);
 };

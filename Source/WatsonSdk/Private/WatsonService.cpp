@@ -99,47 +99,68 @@ T* UWatsonService::CreateWatsonRequest(TSharedPtr<IHttpRequest> Request)
 }
 
 template<typename T>
-bool UWatsonService::ValidateWatsonRequest(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, T*& OutWatsonRequest, FString& OutMessage)
+T* UWatsonService::RetrieveWatsonRequest(const FHttpRequestPtr& Request)
 {
-	OutWatsonRequest = nullptr;
-
 	TSharedPtr<FWatsonRequest>* WatsonRequestPtr = Requests.Find(Request);
 	if (WatsonRequestPtr == nullptr)
 	{
-		OutMessage = "Request not registered.";
-		return false;
+		return nullptr;
 	}
 
 	FWatsonRequest* WatsonRequest = WatsonRequestPtr->Get();
 	if (WatsonRequest == nullptr)
 	{
-		OutMessage = "Request not registered.";
-		return false;
+		return nullptr;
 	}
 
 	T* CastWatsonRequest = (T*) WatsonRequest;
 	if (CastWatsonRequest == nullptr)
 	{
-		OutMessage = "Derived request type not valid.";
-		return false;
+		return nullptr;
 	}
 
-	OutWatsonRequest = CastWatsonRequest;
+	return CastWatsonRequest;
+}
+
+template<typename T>
+bool UWatsonService::ValidateWatsonRequest(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, T*& OutWatsonRequest, FString& OutMessage)
+{
+	OutWatsonRequest = RetrieveWatsonRequest<T>(Request);
+	if (OutWatsonRequest == nullptr)
+	{
+		OutMessage = "Error retrieving watson request.";
+		return false;
+	}
 	if (!bWasSuccessful)
 	{
-		OutWatsonRequest = CastWatsonRequest;
 		OutMessage = "Request was not successful.";
 		return false;
 	}
-
 	if (Response->GetResponseCode() != 200)
 	{
 		OutMessage = "Request failed: " + Response->GetContentAsString();
 		return false;
 	}
-	else
-	{
-		OutMessage = "Success!";
-		return true;
-	}
+	
+	OutMessage = "Success!";
+	return true;
+}
+
+/* Deprecated */
+bool UWatsonService::IsRequestSuccessful(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bWasSuccessful, class FString& OutMessage)
+{
+    if (!bWasSuccessful)
+    {
+        OutMessage = "Request was not successful.";
+        return false;
+    }
+    else if (Response->GetResponseCode() != 200)
+    {
+        OutMessage = "Request failed: " + Response->GetContentAsString();
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }

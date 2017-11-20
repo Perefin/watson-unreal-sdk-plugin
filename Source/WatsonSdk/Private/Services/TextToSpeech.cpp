@@ -13,52 +13,51 @@ UTextToSpeech::UTextToSpeech()
 //////////////////////////////////////////////////////////////////////////
 // Synthesize Audio
 
-FTextToSpeechSynthesizePendingRequest* UTextToSpeech::Synthesize(const FTextToSpeechSynthesizeRequest& Request, const FString& Voice)
+FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept)
 {
-	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
-	HttpRequest->SetVerb("POST");
-	HttpRequest->SetURL(ServiceUrl + "synthesize?voice=" + Voice);
-	HttpRequest->SetHeader(TEXT("Accept"), TEXT("audio/l16;rate=16000;channels=1;"));
-	HttpRequest->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
-	HttpRequest->SetHeader(TEXT("Content-Type"), "application/json");
-	HttpRequest->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
-	HttpRequest->SetContentAsString(StructToString<FTextToSpeechSynthesizeRequest>(Request));
-	HttpRequest->OnRequestProgress().BindUObject(this, &UTextToSpeech::OnSynthesizeProgress);
-	HttpRequest->OnProcessRequestComplete().BindUObject(this, &UTextToSpeech::OnSynthesizeComplete);
+	TSharedPtr<FJsonObject> MessageJson = MakeShareable(new FJsonObject());
+	MessageJson->SetStringField("text", Text);
 
-	TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = MakeShareable(new FTextToSpeechSynthesizePendingRequest);
-	PendingSynthesisRequests.Add(HttpRequest, Delegate);
-	Delegate->HttpRequest = HttpRequest;
-	Delegate->Response = MakeShareable(new FTextToSpeechSynthesizeResponse);
-	return Delegate.Get();
+	FString Path = ServiceUrl + "synthesize";
+	Path += ("?version=" + ServiceVersion);
+	Path += ("&voice=" + Voice);
+	Path += ("&accept=" + Accept);
+	Path += (CustomizationId.IsEmpty() ? "" : "&customization_id=" + CustomizationId);
+
+	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("POST");
+	Request->SetURL(Path);
+	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
+	Request->SetHeader(TEXT("Content-Type"), "application/json");
+	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
+	Request->SetContentAsString(JsonObjectToString(MessageJson));
+	Request->OnProcessRequestComplete().BindUObject(this, &UTextToSpeech::OnSynthesizeAudio);
+	Request->OnRequestProgress().BindUObject(this, &UTextToSpeech::OnSynthesizeAudioProgress);
+	return CreateWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
 }
 
-void UTextToSpeech::OnSynthesizeProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived)
+void UTextToSpeech::OnSynthesizeAudioProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived)
 {
-	TSharedPtr<FTextToSpeechSynthesizePendingRequest>* DelegatePtr = PendingSynthesisRequests.Find(Request);
-	if (DelegatePtr != nullptr)
+	FTextToSpeechSynthesizeAudioRequest* WatsonRequest = RetrieveWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
+	if (WatsonRequest != nullptr)
 	{
-		TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
-		Delegate->Response->audioLength = BytesReceived;
-	}	
-}
-
-void UTextToSpeech::OnSynthesizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	TSharedPtr<FTextToSpeechSynthesizePendingRequest>* DelegatePtr = PendingSynthesisRequests.Find(Request);
-	if (DelegatePtr != nullptr)
-	{
-		TSharedPtr<FTextToSpeechSynthesizePendingRequest> Delegate = *DelegatePtr;
-		FString ErrorMessage;
-		if (IsRequestSuccessful(Request, Response, bWasSuccessful, ErrorMessage))
-		{
-			Delegate->Response->audioData = TArray<uint8>(Response->GetContent());
-			Delegate->OnSuccess.ExecuteIfBound(Delegate->Response);
-		}
-		else
-		{
-			Delegate->OnFailure.ExecuteIfBound(ErrorMessage);
-		}
-		PendingSynthesisRequests.Remove(Request);
+		WatsonRequest->Progress->audioLength = BytesReceived;
 	}
+}
+
+void UTextToSpeech::OnSynthesizeAudio(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorMessage;
+	FTextToSpeechSynthesizeAudioRequest* WatsonRequest;
+	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
+	{
+		TSharedPtr<FTextToSpeechAudio> ResponseAudio = WatsonRequest->Progress;
+		ResponseAudio->audioData = TArray<uint8>(Response->GetContent());	
+		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseAudio);
+	}
+	else
+	{
+		WatsonRequest->OnFailure.ExecuteIfBound(ErrorMessage);
+	}
+	Requests.Remove(Request);
 }
