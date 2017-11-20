@@ -348,7 +348,7 @@ void UConversation::OnGetValue(FHttpRequestPtr Request, FHttpResponsePtr Respons
 //////////////////////////////////////////////////////////////////////////
 // List Synonyms
 
-FConversationListSynonymsRequest* UConversation::ListSynonyms(const FString& WorkspaceId, const FString& Entity, const FString& Value, int32 PageLimit = 100, bool IncludeCount, const FString& Sort)
+FConversationListSynonymsRequest* UConversation::ListSynonyms(const FString& WorkspaceId, const FString& Entity, const FString& Value, int32 PageLimit, bool IncludeCount, const FString& Sort)
 {
 	FString Path = ServiceUrl + "workspaces/" + WorkspaceId + "/entities/" + Entity + "/values/" + Value + "/synonyms";
 	Path += ("?version=" + ServiceVersion);
