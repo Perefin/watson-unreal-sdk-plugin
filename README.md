@@ -11,13 +11,13 @@ Ensure that you have the following prerequisites:
 2. Clone the plugin to your project's <code>Plugins/</code> directory
 3. In Unreal Engine 4, Create Pawn C++ Class
 4. Add Sample Pawn Code to MyPawn.h 
-	* Replace <code>YOURPROJECTNAME</code> in <code>class <YOURPROJECTNAME_API></code> with your project name. (ex: <code>class WATSONUNREALENGINEPROJECT_API</code>)
+	* Replace <code>YourProjectName</code> in <code>class <YOURPROJECTNAME_API></code> with your project name. (ex: <code>class WATSONUNREALENGINEPROJECT_API</code>)
 5. Add Sample Pawn Code to MyPawn.cpp
 	* Insert your IBM Cloud credentials in the following format: <code>"username","password"</code>
 	_Note: See Configure your service credentials below_
 	* Insert Watson Conversation Workspace ID into <code>FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);</code>
 	_Note: See Configure your Watson Conversation Workspace ID below_
-6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YOURPROJECTNAME.Build.cs</code>)
+6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YourProjectName.Build.cs</code>)
 ```csharp
   PrivateDependencyModuleNames.AddRange(new string[] {
     "WatsonSdk",
