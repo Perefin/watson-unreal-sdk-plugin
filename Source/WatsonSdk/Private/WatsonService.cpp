@@ -24,6 +24,12 @@ void UWatsonService::SetVersion(FString Version)
 	ServiceVersion = Version;
 }
 
+void UWatsonService::SetDefaults(FString Url, FString UserAgent, FString Version)
+{
+	ServiceUrl = Url;
+	ServiceUserAgent = UserAgent;
+	ServiceVersion = Version;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Json Helpers

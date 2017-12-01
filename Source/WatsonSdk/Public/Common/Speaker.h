@@ -5,7 +5,7 @@
 #include "Sound/SoundWaveProcedural.h"
 #include "Speaker.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class WATSONSDK_API USpeaker : public UObject
 {
 	GENERATED_BODY()

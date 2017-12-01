@@ -7,7 +7,7 @@
 #include "TextToSpeechSynthesizeModel.h"
 #include "TextToSpeech.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, Category = "Watson")
 class WATSONSDK_API UTextToSpeech : public UWatsonService
 {
 	GENERATED_BODY()

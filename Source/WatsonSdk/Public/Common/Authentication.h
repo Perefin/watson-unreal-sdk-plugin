@@ -3,7 +3,7 @@
 #include "Runtime/Core/Public/Misc/Base64.h"
 #include "Authentication.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FAuthentication
 {
 	GENERATED_USTRUCT_BODY()
@@ -19,9 +19,9 @@ struct FAuthentication
 		return "Basic " + FBase64::Encode(Username + ":" + Password);
 	}
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FString Username;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FString Password;
 };

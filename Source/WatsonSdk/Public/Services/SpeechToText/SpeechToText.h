@@ -7,7 +7,7 @@
 #include "RecognizeDataModel.h"
 #include "SpeechToText.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, Category = "Watson")
 class WATSONSDK_API USpeechToText : public UWatsonService
 {
 	GENERATED_BODY()

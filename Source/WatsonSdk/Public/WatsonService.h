@@ -23,17 +23,23 @@ struct FWatsonRequest
 	}
 };
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, Category = "Watson")
 class WATSONSDK_API UWatsonService : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UWatsonService();
+	UFUNCTION(BlueprintCallable)
 	void SetAuthentication(FAuthentication Authentication);
+	UFUNCTION(BlueprintCallable)
 	void SetUrl(FString Url);
+	UFUNCTION(BlueprintCallable)
 	void SetUserAgent(FString UserAgent);
+	UFUNCTION(BlueprintCallable)
 	void SetVersion(FString Version);
+	UFUNCTION(BlueprintCallable)
+	virtual void SetDefaults(FString Url, FString UserAgent, FString Version);
 
 protected:
 	//////////////////////////////////////////////////////////////////////////
@@ -78,16 +84,18 @@ protected:
 	//////////////////////////////////////////////////////////////////////////
 	// Properties
 
-	UPROPERTY()
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FAuthentication ServiceAuthentication;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ServiceUrl;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FString ServiceUserAgent;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ServiceVersion;
 
 	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FWatsonRequest>> Requests;

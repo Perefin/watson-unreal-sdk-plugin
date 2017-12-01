@@ -6,7 +6,7 @@
 #include "Runtime/Engine/Public/Tickable.h"
 #include "Microphone.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class WATSONSDK_API UMicrophone : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
@@ -25,10 +25,10 @@ public:
 	TStatId GetStatId() const override;
 	void BeginDestroy() override;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<uint8> VoiceCaptureBuffer;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	int32 VoiceCaptureSize;
 
 private:

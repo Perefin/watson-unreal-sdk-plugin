@@ -16,12 +16,13 @@
 #include "ConversationMessageModel.h"
 #include "Conversation.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, Category = "Watson")
 class WATSONSDK_API UConversation : public UWatsonService
 {
 	GENERATED_BODY()
 
 public:
+	//UFUNCTION(BlueprintCallable)
 	UConversation();
 
 	FConversationMessagePendingRequest* Message(const FString& WorkspaceId, const FConversationMessageRequest& Message);
