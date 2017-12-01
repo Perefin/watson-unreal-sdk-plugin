@@ -11,38 +11,6 @@ USpeechToText::USpeechToText()
 
 //////////////////////////////////////////////////////////////////////////
 // Sessionless Recognize Audio
-/*
-FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept)
-{
-	TSharedPtr<FJsonObject> MessageJson = MakeShareable(new FJsonObject());
-	MessageJson->SetStringField("text", Text);
-
-	FString Path = ServiceUrl + "synthesize";
-	Path += ("?voice=" + Voice);
-	Path += ("&accept=" + Accept);
-	Path += (CustomizationId.IsEmpty() ? "" : "&customization_id=" + CustomizationId);
-
-	TSharedPtr<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	Request->SetVerb("POST");
-	Request->SetURL(Path);
-	Request->SetHeader(TEXT("User-Agent"), ServiceUserAgent);
-	Request->SetHeader(TEXT("Content-Type"), "application/json");
-	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
-	Request->SetContentAsString(JsonObjectToString(MessageJson));
-	Request->OnProcessRequestComplete().BindUObject(this, &UTextToSpeech::OnSynthesizeAudio);
-	Request->OnRequestProgress().BindUObject(this, &UTextToSpeech::OnSynthesizeAudioProgress);
-	return CreateWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
-}
-
-void UTextToSpeech::OnSynthesizeAudioProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived)
-{
-	FTextToSpeechSynthesizeAudioRequest* WatsonRequest = RetrieveWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
-	if (WatsonRequest != nullptr)
-	{
-		WatsonRequest->Progress->audioLength = BytesReceived;
-	}
-}
-*/
 
 FSpeechToTextRecognizeRequest* USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel, const FString& ContentType)
 {
