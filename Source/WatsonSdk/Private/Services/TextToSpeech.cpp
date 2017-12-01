@@ -19,8 +19,7 @@ FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FStrin
 	MessageJson->SetStringField("text", Text);
 
 	FString Path = ServiceUrl + "synthesize";
-	Path += ("?version=" + ServiceVersion);
-	Path += ("&voice=" + Voice);
+	Path += ("?voice=" + Voice);
 	Path += ("&accept=" + Accept);
 	Path += (CustomizationId.IsEmpty() ? "" : "&customization_id=" + CustomizationId);
 
