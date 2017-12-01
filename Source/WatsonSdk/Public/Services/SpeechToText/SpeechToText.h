@@ -4,7 +4,7 @@
 #include "Http.h"
 #include "Json.h"
 #include "WatsonService.h"
-#include "RecognizeDataModel.h"
+#include "SpeechToTextRecognizeModel.h"
 #include "SpeechToText.generated.h"
 
 UCLASS(Blueprintable, BlueprintType, Category = "Watson")
@@ -15,22 +15,8 @@ class WATSONSDK_API USpeechToText : public UWatsonService
 public:
 	USpeechToText();
 
-
-
-//////////////////////////////////////////////////////////////////////////
-// Sessionless Recognize Audio
+	FSpeechToTextRecognizeRequest* Recognize(TArray<uint8> AudioData, const FString& AudioModel = "en-US_BroadbandModel", const FString& ContentType = "audio/l16;rate=16000;channels=1;");
 
 private:
-	TMap<TSharedPtr<IHttpRequest>, TSharedPtr<FSpeechToTextRecognizePendingRequest>> PendingRecognizeRequests;
-	void OnRecognizeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
-public:
-	/**
-	* Sends audio and returns transcription results for a sessionless recognition request.
-	*
-	* @param AudioData		The raw audio to be transcribed
-	* @param AudioModel	The identifier of the model to be used for the recognition request
-	* @return				Delegate called when the request is complete.
-	*/
-	FSpeechToTextRecognizePendingRequest* Recognize(TArray<uint8> AudioData, const FString& AudioModel = FString("en-US_BroadbandModel"));
+	void OnRecognize(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 };

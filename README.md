@@ -4,20 +4,20 @@
 Ensure that you have the following prerequisites:
 
 * An IBM Cloud account. If you don't have one, [sign up](https://console.bluemix.net/registration/).
-* Unreal Engine 4.18. 
+* Unreal Engine 4.18.
 
 ## Setup
 1. If it doesn't exist already, create <code>Plugins/</code> folder in your project's directory
 2. Clone the plugin to your project's <code>Plugins/</code> directory
 3. In Unreal Engine 4, Create Pawn C++ Class
-4. Add Sample Pawn Code to MyPawn.h 
-	* Replace <code>YOURPROJECTNAME</code> in <code>class <YOURPROJECTNAME_API></code> with your project name. (ex: <code>class WATSONUNREALENGINEPROJECT_API</code>)
+4. Add Sample Pawn Code to MyPawn.h
+	* Replace <code>YourProjectName</code> in <code>class <YOURPROJECTNAME_API></code> with your project name. (ex: <code>class WATSONUNREALENGINEPROJECT_API</code>)
 5. Add Sample Pawn Code to MyPawn.cpp
 	* Insert your IBM Cloud credentials in the following format: <code>"username","password"</code>
 	_Note: See Configure your service credentials below_
 	* Insert Watson Conversation Workspace ID into <code>FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);</code>
 	_Note: See Configure your Watson Conversation Workspace ID below_
-6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YOURPROJECTNAME.Build.cs</code>)
+6. Add the following module dependencies to your project's <code>.Build.cs</code> (ex: <code>YourProjectName.Build.cs</code>)
 ```csharp
   PrivateDependencyModuleNames.AddRange(new string[] {
     "WatsonSdk",
@@ -99,7 +99,7 @@ Request->Send();
 USpeechToText* MySpeechToText = MyWatson->CreateSpeechToText(FAuthentication(/* username */, /* password */));
 
 // Create and send request
-FSpeechToTextRecognizePendingRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
+FSpeechToTextRecognizeRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
 Request->OnSuccess.BindUObject(this, &AMyPawn::OnSpeechToTextRecognize);
 Request->OnFailure.BindUObject(this, &AMyPawn::OnSpeechToTextFailure);
 Request->Send();
@@ -110,10 +110,7 @@ Request->Send();
 UTextToSpeech* MyTextToSpeech = MyWatson->CreateTextToSpeech(FAuthentication(/* username */, /* password */));
 
 // Create and send request
-FTextToSpeechSynthesizeRequest SynthesisRequest;
-SynthesisRequest.text = "Hello there, how are you?";
-
-FTextToSpeechSynthesizePendingRequest* T2sRequest = MyTextToSpeech->Synthesize(SynthesisRequest, "en-US_AllisonVoice");
+FTextToSpeechSynthesizeAudioRequest* T2sRequest = MyTextToSpeech->Synthesize("Hello there, how are you?");
 T2sRequest->OnSuccess.BindUObject(this, &AMyPawn::OnTextToSpeechSynthesize);
 T2sRequest->OnFailure.BindUObject(this, &AMyPawn::OnTextToSpeechFailure);
 T2sRequest->Send();
@@ -237,7 +234,7 @@ void AMyPawn::OnMicrophoneStop()
 	MyMicrophone->StopRecording();
 
 	// Make Speech To Text Request
-	FSpeechToTextRecognizePendingRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
+	FSpeechToTextRecognizeRequest* Request = MySpeechToText->Recognize(MyMicrophone->GetRecording());
 	Request->OnSuccess.BindUObject(this, &AMyPawn::OnSpeechToTextRecognize);
 	Request->OnFailure.BindUObject(this, &AMyPawn::OnSpeechToTextFailure);
 	Request->Send();
@@ -245,18 +242,22 @@ void AMyPawn::OnMicrophoneStop()
 
 void AMyPawn::OnConversationMessage(TSharedPtr<FConversationMessageResponse> Response)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), *Response->output.text.Last());
+	if (Response->output.text.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: [No Output Text]"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), *Response->output.text.Last());
+		LastResponse = Response;
 
-	LastResponse = Response;
-
-	// Make Text To Speech Request
-	FTextToSpeechSynthesizeRequest SynthesisRequest;
-	SynthesisRequest.text = Response->output.text.Last();
-
-	FTextToSpeechSynthesizePendingRequest* T2sRequest = MyTextToSpeech->Synthesize(SynthesisRequest, "en-US_AllisonVoice");
-	T2sRequest->OnSuccess.BindUObject(this, &AMyPawn::OnTextToSpeechSynthesize);
-	T2sRequest->OnFailure.BindUObject(this, &AMyPawn::OnTextToSpeechFailure);
-	T2sRequest->Send();
+		// Make Text To Speech Request
+		FString Text = Response->output.text.Last();
+		FTextToSpeechSynthesizeAudioRequest* T2sRequest = MyTextToSpeech->SynthesizeAudio(Text);
+		T2sRequest->OnSuccess.BindUObject(this, &AMyPawn::OnTextToSpeechSynthesize);
+		T2sRequest->OnFailure.BindUObject(this, &AMyPawn::OnTextToSpeechFailure);
+		T2sRequest->Send();
+	}
 }
 
 void AMyPawn::OnConversationFailure(FString Error)
@@ -266,21 +267,29 @@ void AMyPawn::OnConversationFailure(FString Error)
 
 void AMyPawn::OnSpeechToTextRecognize(TSharedPtr<FSpeechToTextRecognizeResponse> Response)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Speech To Text Success: %s"), *Response->results[0].alternatives[0].transcript);
-
-	// Make Conversation Request
-	FConversationMessageRequest ConversationRequest;
-	ConversationRequest.input.text = Response->results[0].alternatives[0].transcript;
-	if (LastResponse.Get() != nullptr)
+	if (Response->results.Num() == 0)
 	{
-		ConversationRequest.context = LastResponse->context;
-		ConversationRequest.output = LastResponse->output;
+		UE_LOG(LogTemp, Warning, TEXT("Speech To Text Success: [No Results]"));
 	}
-// Replace string with Workspace ID in IBM Cloud Conversation
-	FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);
-	ConvRequest->OnSuccess.BindUObject(this, &AMyPawn::OnConversationMessage);
-	ConvRequest->OnFailure.BindUObject(this, &AMyPawn::OnConversationFailure);
-	ConvRequest->Send();
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Speech To Text Success: %s"), *Response->results[0].alternatives[0].transcript);
+
+		// Make Conversation Request
+		FConversationMessageRequest ConversationRequest;
+		ConversationRequest.input.text = Response->results[0].alternatives[0].transcript;
+		if (LastResponse.Get() != nullptr)
+		{
+			ConversationRequest.context = LastResponse->context;
+			ConversationRequest.output = LastResponse->output;
+		}
+
+		// Replace string with Workspace ID in IBM Cloud Conversation
+		FConversationMessagePendingRequest* ConvRequest = MyConversation->Message("1a2xxxxx-xxxx-xxxx-xxxx-xxxxxxxx2af", ConversationRequest);
+		ConvRequest->OnSuccess.BindUObject(this, &AMyPawn::OnConversationMessage);
+		ConvRequest->OnFailure.BindUObject(this, &AMyPawn::OnConversationFailure);
+		ConvRequest->Send();
+	}
 }
 
 void AMyPawn::OnSpeechToTextFailure(FString Error)

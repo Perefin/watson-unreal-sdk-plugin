@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RecognizeDataModel.generated.h"
+#include "SpeechToTextRecognizeModel.generated.h"
 
 USTRUCT()
 struct FSpeechToTextRecognizeKeywordResult
@@ -136,36 +136,13 @@ struct FSpeechToTextRecognizeResponse
 	FSpeechToTextRecognizeResponse() {}
 };
 
+
+DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeSuccess, TSharedPtr<FSpeechToTextRecognizeResponse>)
 USTRUCT()
-struct FSpeechToTextRecognizeError
+struct FSpeechToTextRecognizeRequest: public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString error;
-	
-	UPROPERTY()
-	int32 code;
-	
-	UPROPERTY()
-	FString code_description;
-	
-	UPROPERTY()
-	TArray<FString> warnings;
-	
-	FSpeechToTextRecognizeError() {}
+	FSpeechToTextRecognizeSuccess OnSuccess;
+	FSpeechToTextRecognizeRequest() {}
 };
 
-
-DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeSuccessDelegate, TSharedPtr<FSpeechToTextRecognizeResponse>)
-DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeFailureDelegate, FString)
-struct FSpeechToTextRecognizePendingRequest
-{
-	TSharedPtr<IHttpRequest> HttpRequest;
-	FSpeechToTextRecognizeSuccessDelegate OnSuccess;
-	FSpeechToTextRecognizeFailureDelegate OnFailure;
-	void Send()
-	{
-		HttpRequest->ProcessRequest();
-	}
-};
