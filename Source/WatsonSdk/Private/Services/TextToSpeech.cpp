@@ -37,10 +37,10 @@ FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FStrin
 
 void UTextToSpeech::MakeTextToSpeechRequest(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept, FTextToSpeechSynthesizeAudioSuccess OnSuccess, FWatsonRequestFailure OnFailure)
 {
-	FTextToSpeechSynthesizeAudioRequest Request = *SynthesizeAudio(Text, Voice, CustomizationId, Accept);
-	Request.OnSuccess = OnSuccess;
-	Request.OnFailure = OnFailure;
-	Request.Send();
+	FTextToSpeechSynthesizeAudioRequest* Request = SynthesizeAudio(Text, Voice, CustomizationId, Accept);
+	Request->OnSuccess = OnSuccess;
+	Request->OnFailure = OnFailure;
+	Request->Send();
 }
 
 FTextToSpeechAudioInt32 UTextToSpeech::GetAudio(FTextToSpeechAudio original)

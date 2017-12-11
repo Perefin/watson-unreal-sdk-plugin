@@ -44,7 +44,7 @@ public:
 	void SetVersion(FString Version);
 	UFUNCTION(BlueprintCallable)
 	virtual void SetDefaults(FString Url, FString UserAgent, FString Version);
-	UFUNCTION(BlueprintCallable)
+	//UFUNCTION(BlueprintCallable)
 	static void SendRequest(FWatsonRequest Request);
 
 protected:

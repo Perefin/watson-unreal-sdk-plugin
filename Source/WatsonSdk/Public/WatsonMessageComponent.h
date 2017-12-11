@@ -28,10 +28,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SendMessage(FString Message, UConversation* MyConversation);
 	UFUNCTION(BlueprintCallable)
+	FConversationMessageResponse GetLastResponse();
+	UFUNCTION(BlueprintCallable)
 	void OnConversationMessage(FConversationMessageResponse Response);
 	UFUNCTION(BlueprintCallable)
 	void OnConversationFailure(FString Error);
 
+	//UPROPERTY()
 	TSharedPtr<FConversationMessageResponse> LastResponse;
 private:
 	//UPROPERTY(BlueprintReadWrite)

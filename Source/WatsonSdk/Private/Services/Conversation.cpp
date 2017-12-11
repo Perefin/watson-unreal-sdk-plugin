@@ -41,11 +41,12 @@ void UConversation::MakeConversationRequest(const FString& WorkspaceId, const FC
 	Request->Send();
 }
 
-void UConversation::PassContextAndOutputToRequest(FConversationMessageRequest Request, FConversationMessageResponse Response)
+FConversationMessageRequest UConversation::PassContextAndOutputToRequest(FConversationMessageRequest Request, FConversationMessageResponse Response)
 {
 	Request.context = Response.context;
 	Request.output = Response.output;
 
+	return Request;
 }
 
 void UConversation::OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)

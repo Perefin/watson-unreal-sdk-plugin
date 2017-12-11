@@ -31,10 +31,11 @@ FSpeechToTextRecognizeRequest USpeechToText::Recognize(TArray<uint8> AudioData, 
 
 void USpeechToText::MakeSpeechToTextRequest(UObject* object,TArray<uint8> AudioData, FSpeechToTextRecognizeSuccess OnSuccess, FWatsonRequestFailure OnFailure)
 {
-	FSpeechToTextRecognizeRequest Request = Recognize(AudioData);
-	Request.OnSuccess = OnSuccess;
-	Request.OnFailure = OnFailure;
-	Request.Send();
+	TSharedPtr<FSpeechToTextRecognizeRequest> Request = MakeShareable(new FSpeechToTextRecognizeRequest());
+	*Request = Recognize(AudioData);
+	Request->OnSuccess = OnSuccess;
+	Request->OnFailure = OnFailure;
+	Request->Send();
 }
 
 void USpeechToText::OnRecognize(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)

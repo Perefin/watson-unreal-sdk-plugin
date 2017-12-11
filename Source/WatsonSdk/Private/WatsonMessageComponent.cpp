@@ -57,6 +57,15 @@ UTextToSpeech* UWatsonMessageComponent::CreateTextToSpeech(const FAuthentication
 	return TextToSpeech;
 }
 
+FConversationMessageResponse UWatsonMessageComponent::GetLastResponse()
+{
+	if (!LastResponse.IsValid())
+	{
+		LastResponse = MakeShareable(new FConversationMessageResponse);
+	}
+	return *LastResponse;
+}
+
 void UWatsonMessageComponent::SendMessage(FString Message, UConversation* MyConversation)
 {
 	// Create and send request
@@ -77,10 +86,8 @@ void UWatsonMessageComponent::OnConversationMessage(FConversationMessageResponse
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), Response.output.text.Last());
-		//FString message = Response.output.text.Last();
-		//message = ("Conversation Success: %s", Response.output.text.Last());
-		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: ")); // FName(*Response.output.text.Last()));
+
+		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), *Response.output.text.Last());
 
 		if (!LastResponse.IsValid())
 		{
