@@ -42,21 +42,25 @@ struct FConversationIntentList
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationListIntentsSuccess, TSharedPtr<FConversationIntentList>)
-USTRUCT()
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationListIntentsSuccess, FConversationIntentList, ConversationIntentList);
+USTRUCT(BlueprintType)
 struct FConversationListIntentsRequest : public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(BlueprintReadWrite)
 	FConversationListIntentsSuccess OnSuccess;
 	FConversationListIntentsRequest() {}
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationGetIntentSuccess, TSharedPtr<FConversationIntent>)
-USTRUCT()
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationGetIntentSuccess, FConversationIntent, ConversationIntent);
+USTRUCT(BlueprintType)
 struct FConversationGetIntentRequest : public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
 	FConversationGetIntentSuccess OnSuccess;
 	FConversationGetIntentRequest() {}
 };

@@ -6,7 +6,7 @@
 #include "Runtime/Engine/Public/Tickable.h"
 #include "Microphone.generated.h"
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(BlueprintType)
 class WATSONSDK_API UMicrophone : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
@@ -16,6 +16,8 @@ public:
 
 	void StartRecording();
 	void StopRecording();
+
+	UFUNCTION(BlueprintCallable)
 	TArray<uint8> GetRecording();
 
 	void Tick(float DeltaTime) override;

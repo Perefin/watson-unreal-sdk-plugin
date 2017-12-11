@@ -107,7 +107,7 @@ struct FConversationDialogNodeList
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationListDialogNodesSuccess, TSharedPtr<FConversationDialogNodeList>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationListDialogNodesSuccess, FConversationDialogNodeList, ConversationDialogNodeList);
 USTRUCT()
 struct FConversationListDialogNodesRequest : public FWatsonRequest
 {
@@ -117,7 +117,7 @@ struct FConversationListDialogNodesRequest : public FWatsonRequest
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationGetDialogNodeSuccess, TSharedPtr<FConversationDialogNode>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationGetDialogNodeSuccess, FConversationDialogNode, ConversationDialogNode);
 USTRUCT()
 struct FConversationGetDialogNodeRequest : public FWatsonRequest
 {

@@ -2,146 +2,153 @@
 
 #include "SpeechToTextRecognizeModel.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeKeywordResult
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString normalized_text;
-	
-	UPROPERTY()
-	int32 start_time;
-	
-	UPROPERTY()
-	int32 end_time;
-	
-	UPROPERTY()
-	int32 confidence;
-	
+
+public:
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString normalized_text;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 start_time;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 end_time;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 confidence;
+
 	FSpeechToTextRecognizeKeywordResult() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeSpeakerLabelsResult
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	int32 from;
-	
-	UPROPERTY()
-	int32 to;
-	
-	UPROPERTY()
-	int32 speaker;
-	
-	UPROPERTY()
-	int32 confidence;
 
-	//UPROPERTY()
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 from;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 to;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 speaker;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 confidence;
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	//bool final;
 
 	FSpeechToTextRecognizeSpeakerLabelsResult() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeAlternative
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	FString transcript;
-	
-	UPROPERTY()
-	int32 confidence;
-	
-	UPROPERTY()
-	TArray<FString> timestamps;
-	
-	UPROPERTY()
-	TArray<FString> word_confidence;
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString transcript;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 confidence;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FString> timestamps;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FString> word_confidence;
 
 	FSpeechToTextRecognizeAlternative() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeWordAlternativeResult
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	int32 confidence;
-	
-	UPROPERTY()
-	FString word;
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 confidence;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		FString word;
 
 	FSpeechToTextRecognizeWordAlternativeResult() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeWordAlternativeResults
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	int32 start_time;
-	
-	UPROPERTY()
-	int32 end_time;
-	
-	UPROPERTY()
-	TArray<FSpeechToTextRecognizeWordAlternativeResult> alternatives;
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 start_time;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 end_time;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FSpeechToTextRecognizeWordAlternativeResult> alternatives;
 
 	FSpeechToTextRecognizeWordAlternativeResults() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeResult
 {
 	GENERATED_USTRUCT_BODY()
-	
-	//UPROPERTY()
-	//bool final;
-	
-	UPROPERTY()
-	TArray<FSpeechToTextRecognizeAlternative> alternatives;
-	
-	UPROPERTY()
-	TMap<FString, FSpeechToTextRecognizeKeywordResult> keyword_results;
-	
-	UPROPERTY()
-	TArray<FSpeechToTextRecognizeWordAlternativeResults> word_alternatives;
+
+		//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		//bool final;
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FSpeechToTextRecognizeAlternative> alternatives;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TMap<FString, FSpeechToTextRecognizeKeywordResult> keyword_results;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FSpeechToTextRecognizeWordAlternativeResults> word_alternatives;
 
 	FSpeechToTextRecognizeResult() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FSpeechToTextRecognizeResponse
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY()
-	TArray<FSpeechToTextRecognizeResult> results;
-	
-	UPROPERTY()
-	int32 result_index;
-	
-	UPROPERTY()
-	TArray<FSpeechToTextRecognizeSpeakerLabelsResult> speaker_labels;
-	
-	UPROPERTY()
-	TArray<FString> warnings;
+
+		UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FSpeechToTextRecognizeResult> results;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 result_index;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FSpeechToTextRecognizeSpeakerLabelsResult> speaker_labels;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FString> warnings;
 
 	FSpeechToTextRecognizeResponse() {}
 };
 
 
-DECLARE_DELEGATE_OneParam(FSpeechToTextRecognizeSuccess, TSharedPtr<FSpeechToTextRecognizeResponse>)
-USTRUCT()
-struct FSpeechToTextRecognizeRequest: public FWatsonRequest
+DECLARE_DYNAMIC_DELEGATE_OneParam(FSpeechToTextRecognizeSuccess, FSpeechToTextRecognizeResponse, SpeechToTextRecognizeResponse);
+
+USTRUCT(BlueprintType)
+struct FSpeechToTextRecognizeRequest : public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadWrite)
 	FSpeechToTextRecognizeSuccess OnSuccess;
 	FSpeechToTextRecognizeRequest() {}
 };

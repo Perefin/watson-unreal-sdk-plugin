@@ -12,7 +12,7 @@ USpeechToText::USpeechToText()
 //////////////////////////////////////////////////////////////////////////
 // Sessionless Recognize Audio
 
-FSpeechToTextRecognizeRequest* USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel, const FString& ContentType)
+FSpeechToTextRecognizeRequest USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel, const FString& ContentType)
 {
 	FString Path = ServiceUrl + "recognize";
 	Path += ("?model=" + AudioModel);
@@ -25,7 +25,16 @@ FSpeechToTextRecognizeRequest* USpeechToText::Recognize(TArray<uint8> AudioData,
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->SetContent(AudioData);
 	Request->OnProcessRequestComplete().BindUObject(this, &USpeechToText::OnRecognize);
-	return CreateWatsonRequest<FSpeechToTextRecognizeRequest>(Request);
+	return *CreateWatsonRequest<FSpeechToTextRecognizeRequest>(Request);
+}
+
+
+void USpeechToText::MakeSpeechToTextRequest(UObject* object,TArray<uint8> AudioData, FSpeechToTextRecognizeSuccess OnSuccess, FWatsonRequestFailure OnFailure)
+{
+	FSpeechToTextRecognizeRequest Request = Recognize(AudioData);
+	Request.OnSuccess = OnSuccess;
+	Request.OnFailure = OnFailure;
+	Request.Send();
 }
 
 void USpeechToText::OnRecognize(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -35,8 +44,9 @@ void USpeechToText::OnRecognize(FHttpRequestPtr Request, FHttpResponsePtr Respon
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FSpeechToTextRecognizeResponse> ResponseStruct = JsonObjectToStruct<FSpeechToTextRecognizeResponse>(ResponseJson);
+		FSpeechToTextRecognizeResponse ResponseStruct = JsonObjectToStruct<FSpeechToTextRecognizeResponse>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
+		
 	}
 	else
 	{

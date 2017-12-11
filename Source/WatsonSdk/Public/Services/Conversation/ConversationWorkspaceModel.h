@@ -68,7 +68,7 @@ struct FConversationWorkspaceList
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationListWorkspacesSuccess, TSharedPtr<FConversationWorkspaceList>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationListWorkspacesSuccess, FConversationWorkspaceList, ConversationWorkspaceList);
 USTRUCT()
 struct FConversationListWorkspacesRequest : public FWatsonRequest
 {
@@ -78,7 +78,7 @@ struct FConversationListWorkspacesRequest : public FWatsonRequest
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationGetWorkspaceSuccess, TSharedPtr<FConversationWorkspace>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationGetWorkspaceSuccess, FConversationWorkspace, ConversationWorkspace);
 USTRUCT()
 struct FConversationGetWorkspaceRequest : public FWatsonRequest
 {

@@ -2,100 +2,100 @@
 
 #include "ConversationMessageModel.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageRuntimeIntent
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString intent;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float confidence;
 	
 	FConversationMessageRuntimeIntent() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageRuntimeEntity
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString entity;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<int32> location;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString value;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float confidence;
 	
 	FConversationMessageRuntimeEntity() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageLogMessage
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString level;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString msg;
 	
 	FConversationMessageLogMessage() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageOutputData
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FConversationMessageLogMessage> log_messages;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FString> text;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FString> nodes_visited;
 	
 	FConversationMessageOutputData() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageInputData
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString text;
 	
 	FConversationMessageInputData() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageRequest
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FConversationMessageInputData input;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool alternate_intents = false;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FConversationMessageRuntimeEntity> entities;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FConversationMessageRuntimeIntent> intents;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FConversationMessageOutputData output;
 
 	TSharedPtr<FJsonObject> context;
@@ -103,35 +103,35 @@ struct FConversationMessageRequest
 	FConversationMessageRequest() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageInput
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FString text;
 	
 	FConversationMessageInput() {}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FConversationMessageResponse
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FConversationMessageInput input;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FConversationMessageRuntimeIntent> intents;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FConversationMessageRuntimeEntity> entities;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	bool alternate_intents;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FConversationMessageOutputData output;
 
 	TSharedPtr<FJsonObject> context;
@@ -140,11 +140,15 @@ struct FConversationMessageResponse
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationMessageSuccess, TSharedPtr<FConversationMessageResponse>)
-USTRUCT()
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationMessageSuccess, FConversationMessageResponse, ConversationMessageResponse);
+USTRUCT(BlueprintType)
 struct FConversationMessagePendingRequest : public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadWrite)
 	FConversationMessageSuccess OnSuccess;
 	FConversationMessagePendingRequest() {}
 };

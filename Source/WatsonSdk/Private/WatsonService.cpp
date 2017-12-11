@@ -31,6 +31,11 @@ void UWatsonService::SetDefaults(FString Url, FString UserAgent, FString Version
 	ServiceVersion = Version;
 }
 
+void UWatsonService::SendRequest(FWatsonRequest Request)
+{
+	Request.Send();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Json Helpers
 
@@ -75,11 +80,11 @@ TSharedPtr<FJsonObject> UWatsonService::StructToJsonObject(const T& Struct)
 }
 
 template<typename T>
-TSharedPtr<T> UWatsonService::JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject)
+T UWatsonService::JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject)
 {
 	TSharedPtr<T> Result = MakeShareable(new T);
 	FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), T::StaticStruct(), Result.Get(), 0, 0);
-	return Result;
+	return *Result;
 }
 
 template<typename T>
@@ -107,6 +112,7 @@ T* UWatsonService::CreateWatsonRequest(TSharedPtr<IHttpRequest> Request)
 template<typename T>
 T* UWatsonService::RetrieveWatsonRequest(const FHttpRequestPtr& Request)
 {
+
 	TSharedPtr<FWatsonRequest>* WatsonRequestPtr = Requests.Find(Request);
 	if (WatsonRequestPtr == nullptr)
 	{
@@ -119,7 +125,7 @@ T* UWatsonService::RetrieveWatsonRequest(const FHttpRequestPtr& Request)
 		return nullptr;
 	}
 
-	T* CastWatsonRequest = (T*) WatsonRequest;
+	T* CastWatsonRequest = (T*)WatsonRequest;
 	if (CastWatsonRequest == nullptr)
 	{
 		return nullptr;
@@ -147,7 +153,7 @@ bool UWatsonService::ValidateWatsonRequest(const FHttpRequestPtr& Request, const
 		OutMessage = "Request failed: " + Response->GetContentAsString();
 		return false;
 	}
-	
+
 	OutMessage = "Success!";
 	return true;
 }

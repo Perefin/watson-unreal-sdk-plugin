@@ -22,6 +22,7 @@ public:
 	void StartRecording();
 	UFUNCTION(BlueprintCallable)
 	void StopRecording();
+	UFUNCTION(BlueprintCallable)
 	TArray<uint8> GetRecording();
 
 	void BeginDestroy() override;

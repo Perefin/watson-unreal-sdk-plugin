@@ -27,14 +27,15 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UFUNCTION()
+	//UFUNCTION(BlueprintCallable)
 	void PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLength);
-
-private:
-	UPROPERTY()
+	UFUNCTION(BlueprintCallable)
+	void PlayAudio(const TArray<uint8>& AudioData, int32 AudioLength);
+//private:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UAudioComponent* AudioOutputComponent;
 
-	UPROPERTY(Transient, Instanced)
+	UPROPERTY(BlueprintReadWrite, Transient)
 		USoundWaveProcedural* AudioPCMComponent;
-	
+
 };

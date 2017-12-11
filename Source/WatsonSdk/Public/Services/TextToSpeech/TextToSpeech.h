@@ -16,6 +16,11 @@ public:
 	UTextToSpeech();
 
 	FTextToSpeechSynthesizeAudioRequest* SynthesizeAudio(const FString& Text, const FString& Voice = "en-US_MichaelVoice", const FString& CustomizationId = "", const FString& Accept = "audio/l16;rate=16000;channels=1;");
+	UFUNCTION(BlueprintCallable)
+	void MakeTextToSpeechRequest(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept, FTextToSpeechSynthesizeAudioSuccess OnSuccess, FWatsonRequestFailure OnFailure);
+	UFUNCTION(BlueprintCallable)
+	FTextToSpeechAudioInt32 GetAudio(FTextToSpeechAudio original);
+	
 
 private:
 	void OnSynthesizeAudio(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);

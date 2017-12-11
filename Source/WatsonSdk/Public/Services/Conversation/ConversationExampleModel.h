@@ -35,7 +35,7 @@ struct FConversationExampleList
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationListExamplesSuccess, TSharedPtr<FConversationExampleList>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationListExamplesSuccess, FConversationExampleList, ConversationExampleList);
 USTRUCT()
 struct FConversationListExamplesRequest : public FWatsonRequest
 {
@@ -45,7 +45,7 @@ struct FConversationListExamplesRequest : public FWatsonRequest
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationGetExampleSuccess, TSharedPtr<FConversationExample>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationGetExampleSuccess, FConversationExample, ConversationExample);
 USTRUCT()
 struct FConversationGetExampleRequest : public FWatsonRequest
 {

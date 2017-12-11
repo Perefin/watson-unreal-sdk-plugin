@@ -25,7 +25,14 @@ public:
 	UTextToSpeech* CreateTextToSpeech(const FAuthentication& Authentication);
 	UFUNCTION(BlueprintCallable)
 	USpeechToText* CreateSpeechToText(const FAuthentication& Authentication);
+	UFUNCTION(BlueprintCallable)
+		void SendMessage(FString Message, UConversation* MyConversation);
+	UFUNCTION(BlueprintCallable)
+	void OnConversationMessage(FConversationMessageResponse Response);
+	UFUNCTION(BlueprintCallable)
+	void OnConversationFailure(FString Error);
 
+	TSharedPtr<FConversationMessageResponse> LastResponse;
 private:
 	//UPROPERTY(BlueprintReadWrite)
 		TArray<UWatsonService*> ServiceList;

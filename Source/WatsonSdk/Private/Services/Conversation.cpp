@@ -33,6 +33,21 @@ FConversationMessagePendingRequest* UConversation::Message(const FString& Worksp
 	return CreateWatsonRequest<FConversationMessagePendingRequest>(Request);
 }
 
+void UConversation::MakeConversationRequest(const FString& WorkspaceId, const FConversationMessageRequest& Message, FConversationMessageSuccess OnSuccess, FWatsonRequestFailure OnFailure)
+{
+	FConversationMessagePendingRequest* Request = UConversation::Message(WorkspaceId, Message);
+	Request->OnSuccess = OnSuccess;
+	Request->OnFailure = OnFailure;
+	Request->Send();
+}
+
+void UConversation::PassContextAndOutputToRequest(FConversationMessageRequest Request, FConversationMessageResponse Response)
+{
+	Request.context = Response.context;
+	Request.output = Response.output;
+
+}
+
 void UConversation::OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	FString ErrorMessage;
@@ -40,8 +55,8 @@ void UConversation::OnMessage(FHttpRequestPtr Request, FHttpResponsePtr Response
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationMessageResponse> ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
-		ResponseStruct->context = ResponseJson->GetObjectField("context");
+		FConversationMessageResponse ResponseStruct = JsonObjectToStruct<FConversationMessageResponse>(ResponseJson);
+		ResponseStruct.context = ResponseJson->GetObjectField("context");
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -76,7 +91,7 @@ void UConversation::OnListWorkspaces(FHttpRequestPtr Request, FHttpResponsePtr R
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationWorkspaceList> ResponseStruct = JsonObjectToStruct<FConversationWorkspaceList>(ResponseJson);
+		FConversationWorkspaceList ResponseStruct = JsonObjectToStruct<FConversationWorkspaceList>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -112,7 +127,7 @@ void UConversation::OnGetWorkspace(FHttpRequestPtr Request, FHttpResponsePtr Res
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationWorkspace> ResponseStruct = JsonObjectToStruct<FConversationWorkspace>(ResponseJson);
+		FConversationWorkspace ResponseStruct = JsonObjectToStruct<FConversationWorkspace>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -150,7 +165,7 @@ void UConversation::OnListCounterexamples(FHttpRequestPtr Request, FHttpResponse
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationCounterexampleList> ResponseStruct = JsonObjectToStruct<FConversationCounterexampleList>(ResponseJson);
+		FConversationCounterexampleList ResponseStruct = JsonObjectToStruct<FConversationCounterexampleList>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -185,7 +200,7 @@ void UConversation::OnGetCounterexample(FHttpRequestPtr Request, FHttpResponsePt
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationCounterexample> ResponseStruct = JsonObjectToStruct<FConversationCounterexample>(ResponseJson);
+		FConversationCounterexample ResponseStruct = JsonObjectToStruct<FConversationCounterexample>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -224,7 +239,7 @@ void UConversation::OnListEntities(FHttpRequestPtr Request, FHttpResponsePtr Res
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationEntityList> ResponseStruct = JsonObjectToStruct<FConversationEntityList>(ResponseJson);
+		FConversationEntityList ResponseStruct = JsonObjectToStruct<FConversationEntityList>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -260,7 +275,7 @@ void UConversation::OnGetEntity(FHttpRequestPtr Request, FHttpResponsePtr Respon
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationEntity> ResponseStruct = JsonObjectToStruct<FConversationEntity>(ResponseJson);
+		FConversationEntity ResponseStruct = JsonObjectToStruct<FConversationEntity>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -299,7 +314,7 @@ void UConversation::OnListValues(FHttpRequestPtr Request, FHttpResponsePtr Respo
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationValueList> ResponseStruct = JsonObjectToStruct<FConversationValueList>(ResponseJson);
+		FConversationValueList ResponseStruct = JsonObjectToStruct<FConversationValueList>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -335,7 +350,7 @@ void UConversation::OnGetValue(FHttpRequestPtr Request, FHttpResponsePtr Respons
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationValue> ResponseStruct = JsonObjectToStruct<FConversationValue>(ResponseJson);
+		FConversationValue ResponseStruct = JsonObjectToStruct<FConversationValue>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -373,7 +388,7 @@ void UConversation::OnListSynonyms(FHttpRequestPtr Request, FHttpResponsePtr Res
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationSynonymList> ResponseStruct = JsonObjectToStruct<FConversationSynonymList>(ResponseJson);
+		FConversationSynonymList ResponseStruct = JsonObjectToStruct<FConversationSynonymList>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else
@@ -408,7 +423,7 @@ void UConversation::OnGetSynonym(FHttpRequestPtr Request, FHttpResponsePtr Respo
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
 		TSharedPtr<FJsonObject> ResponseJson = StringToJsonObject(Response->GetContentAsString());
-		TSharedPtr<FConversationSynonym> ResponseStruct = JsonObjectToStruct<FConversationSynonym>(ResponseJson);
+		FConversationSynonym ResponseStruct = JsonObjectToStruct<FConversationSynonym>(ResponseJson);
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseStruct);
 	}
 	else

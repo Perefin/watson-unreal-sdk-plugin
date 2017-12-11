@@ -51,3 +51,8 @@ void USpeakerComponent::PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLe
 	AudioOutputComponent->Play();
 }
 
+void USpeakerComponent::PlayAudio(const TArray<uint8>& AudioData, int32 AudioLength)
+{
+	PlayAudio(AudioData,(uint32) AudioLength);
+}
+

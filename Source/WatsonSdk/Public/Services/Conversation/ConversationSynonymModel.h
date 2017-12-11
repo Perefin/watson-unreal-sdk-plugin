@@ -35,7 +35,7 @@ struct FConversationSynonymList
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationListSynonymsSuccess, TSharedPtr<FConversationSynonymList>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationListSynonymsSuccess, FConversationSynonymList, ConversationSynonymList);
 USTRUCT()
 struct FConversationListSynonymsRequest : public FWatsonRequest
 {
@@ -45,7 +45,7 @@ struct FConversationListSynonymsRequest : public FWatsonRequest
 };
 
 
-DECLARE_DELEGATE_OneParam(FConversationGetSynonymSuccess, TSharedPtr<FConversationSynonym>)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FConversationGetSynonymSuccess, FConversationSynonym, ConversationSynonym);
 USTRUCT()
 struct FConversationGetSynonymRequest : public FWatsonRequest
 {

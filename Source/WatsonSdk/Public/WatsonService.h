@@ -7,23 +7,27 @@
 #include "Common/Authentication.h"
 #include "WatsonService.generated.h"
 
-DECLARE_DELEGATE_OneParam(FWatsonRequestFailure, FString)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FWatsonRequestFailure, FString, str);
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
 
 	TSharedPtr<IHttpRequest> HttpRequest;
+public:
+	
+	UPROPERTY(BlueprintReadWrite)
 	FWatsonRequestFailure OnFailure;
 
+//	UFUNCTION(BlueprintCallable)
 	void Send()
 	{
 		HttpRequest->ProcessRequest();
 	}
 };
 
-UCLASS(Blueprintable, BlueprintType, Category = "Watson")
+UCLASS(BlueprintType, Category = "Watson")
 class WATSONSDK_API UWatsonService : public UObject
 {
 	GENERATED_BODY()
@@ -40,6 +44,8 @@ public:
 	void SetVersion(FString Version);
 	UFUNCTION(BlueprintCallable)
 	virtual void SetDefaults(FString Url, FString UserAgent, FString Version);
+	UFUNCTION(BlueprintCallable)
+	static void SendRequest(FWatsonRequest Request);
 
 protected:
 	//////////////////////////////////////////////////////////////////////////
@@ -59,7 +65,7 @@ protected:
 	TSharedPtr<FJsonObject> StructToJsonObject(const T& Struct);
 
 	template<typename T>
-	TSharedPtr<T> JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject);
+	T JsonObjectToStruct(const TSharedPtr<FJsonObject> JsonObject);
 	
 	template<typename T>
 	void RemoveJsonArrayIfEmpty(FJsonObject* JsonObject, const FString& Field, const TArray<T>& Array);

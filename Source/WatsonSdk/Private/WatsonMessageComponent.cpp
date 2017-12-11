@@ -57,3 +57,50 @@ UTextToSpeech* UWatsonMessageComponent::CreateTextToSpeech(const FAuthentication
 	return TextToSpeech;
 }
 
+void UWatsonMessageComponent::SendMessage(FString Message, UConversation* MyConversation)
+{
+	// Create and send request
+	FConversationMessageRequest ConversationRequest;
+	ConversationRequest.input.text = Message;
+
+	FConversationMessagePendingRequest* Request = MyConversation->Message("1a2cdfcd-e42a-43f7-947c-ba44ebf4f2af", ConversationRequest);
+	Request->OnSuccess.BindDynamic(this, &UWatsonMessageComponent::OnConversationMessage);
+	Request->OnFailure.BindDynamic(this, &UWatsonMessageComponent::OnConversationFailure);
+	Request->Send();
+}
+
+void UWatsonMessageComponent::OnConversationMessage(FConversationMessageResponse Response)
+{
+	if (Response.output.text.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: [No Output Text]"));
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Conversation Success: %s"), Response.output.text.Last());
+		//FString message = Response.output.text.Last();
+		//message = ("Conversation Success: %s", Response.output.text.Last());
+		UE_LOG(LogTemp, Warning, TEXT("Conversation Success: ")); // FName(*Response.output.text.Last()));
+
+		if (!LastResponse.IsValid())
+		{
+			LastResponse = MakeShareable(new FConversationMessageResponse);
+			*LastResponse = Response;
+		}
+		else
+		{
+			*LastResponse = Response;
+		}
+		// Make Text To Speech Request
+
+		/*FTextToSpeechSynthesizeAudioRequest T2sRequest = MyTextToSpeech->SynthesizeAudio(Response.output.text.Last());
+		T2sRequest.OnSuccess.BindDynamic(this, &AMyPawn::OnTextToSpeechSynthesize);
+		T2sRequest.OnFailure.BindDynamic(this, &AMyPawn::OnTextToSpeechFailure);
+		T2sRequest.Send();*/
+	}
+}
+
+void UWatsonMessageComponent::OnConversationFailure(FString Error)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Conversation Error: %s"), *Error);
+}

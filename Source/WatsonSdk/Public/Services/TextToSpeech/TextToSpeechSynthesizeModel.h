@@ -2,12 +2,12 @@
 
 #include "TextToSpeechSynthesizeModel.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FTextToSpeechAudio
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<uint8> audioData;
 	
 	UPROPERTY()
@@ -16,15 +16,38 @@ struct FTextToSpeechAudio
 	FTextToSpeechAudio() {}
 };
 
+USTRUCT(BlueprintType)
+struct FTextToSpeechAudioInt32
+{
+	GENERATED_USTRUCT_BODY()
 
-DECLARE_DELEGATE_OneParam(FTextToSpeechSynthesizeAudioSuccess, TSharedPtr<FTextToSpeechAudio>)
-USTRUCT()
+	UPROPERTY(BlueprintReadWrite)
+		TArray<uint8> audioData;
+
+	UPROPERTY(BlueprintReadWrite)
+		int32 audioLength;
+
+	FTextToSpeechAudioInt32() {}
+
+	FTextToSpeechAudioInt32(FTextToSpeechAudio original) 
+	{
+		audioData = original.audioData;
+		audioLength = original.audioLength;
+	}
+
+};
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FTextToSpeechSynthesizeAudioSuccess, FTextToSpeechAudio, TextToSpeechAudio);
+USTRUCT(BlueprintType)
 struct FTextToSpeechSynthesizeAudioRequest: public FWatsonRequest
 {
 	GENERATED_USTRUCT_BODY()
-	TSharedPtr<FTextToSpeechAudio> Progress;
+
+	FTextToSpeechAudio Progress;
+public:
+	UPROPERTY(BlueprintReadWrite)
 	FTextToSpeechSynthesizeAudioSuccess OnSuccess;
 	FTextToSpeechSynthesizeAudioRequest() {
-		Progress = MakeShareable(new FTextToSpeechAudio());
+		Progress = FTextToSpeechAudio();
 	}
 };

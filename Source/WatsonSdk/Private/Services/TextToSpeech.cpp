@@ -35,13 +35,24 @@ FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FStrin
 	return CreateWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
 }
 
+void UTextToSpeech::MakeTextToSpeechRequest(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept, FTextToSpeechSynthesizeAudioSuccess OnSuccess, FWatsonRequestFailure OnFailure)
+{
+	FTextToSpeechSynthesizeAudioRequest Request = *SynthesizeAudio(Text, Voice, CustomizationId, Accept);
+	Request.OnSuccess = OnSuccess;
+	Request.OnFailure = OnFailure;
+	Request.Send();
+}
+
+FTextToSpeechAudioInt32 UTextToSpeech::GetAudio(FTextToSpeechAudio original)
+{
+	return FTextToSpeechAudioInt32(original);
+}
+
 void UTextToSpeech::OnSynthesizeAudioProgress(FHttpRequestPtr Request, int32 BytesSent, int32 BytesReceived)
 {
-	FTextToSpeechSynthesizeAudioRequest* WatsonRequest = RetrieveWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
-	if (WatsonRequest != nullptr)
-	{
-		WatsonRequest->Progress->audioLength = BytesReceived;
-	}
+	FTextToSpeechSynthesizeAudioRequest WatsonRequest = *RetrieveWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
+
+	WatsonRequest.Progress.audioLength = BytesReceived;
 }
 
 void UTextToSpeech::OnSynthesizeAudio(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -50,8 +61,8 @@ void UTextToSpeech::OnSynthesizeAudio(FHttpRequestPtr Request, FHttpResponsePtr 
 	FTextToSpeechSynthesizeAudioRequest* WatsonRequest;
 	if (ValidateWatsonRequest(Request, Response, bWasSuccessful, WatsonRequest, ErrorMessage))
 	{
-		TSharedPtr<FTextToSpeechAudio> ResponseAudio = WatsonRequest->Progress;
-		ResponseAudio->audioData = TArray<uint8>(Response->GetContent());	
+		FTextToSpeechAudio ResponseAudio = WatsonRequest->Progress;
+		ResponseAudio.audioData = TArray<uint8>(Response->GetContent());	
 		WatsonRequest->OnSuccess.ExecuteIfBound(ResponseAudio);
 	}
 	else
