@@ -17,8 +17,8 @@ class WATSONSDK_API USpeechToText : public UWatsonService
 public:
 	USpeechToText();
 
-	UFUNCTION(BlueprintCallable)
-		FSpeechToTextRecognizeRequest Recognize(TArray<uint8> AudioData, const FString& AudioModel = "en-US_BroadbandModel", const FString& ContentType = "audio/l16;rate=16000;channels=1;");
+//	UFUNCTION(BlueprintCallable)
+		FSpeechToTextRecognizeRequest* Recognize(TArray<uint8> AudioData, const FString& AudioModel = "en-US_BroadbandModel", const FString& ContentType = "audio/l16;rate=16000;channels=1;");
 	
 	UFUNCTION(BlueprintCallable)
 	void MakeSpeechToTextRequest(UObject* object, TArray<uint8> AudioData, FSpeechToTextRecognizeSuccess OnSuccess, FWatsonRequestFailure OnFailure);

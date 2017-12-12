@@ -12,7 +12,7 @@ USpeechToText::USpeechToText()
 //////////////////////////////////////////////////////////////////////////
 // Sessionless Recognize Audio
 
-FSpeechToTextRecognizeRequest USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel, const FString& ContentType)
+FSpeechToTextRecognizeRequest* USpeechToText::Recognize(TArray<uint8> AudioData, const FString& AudioModel, const FString& ContentType)
 {
 	FString Path = ServiceUrl + "recognize";
 	Path += ("?model=" + AudioModel);
@@ -25,14 +25,13 @@ FSpeechToTextRecognizeRequest USpeechToText::Recognize(TArray<uint8> AudioData, 
 	Request->SetHeader(TEXT("Authorization"), ServiceAuthentication.Encode());
 	Request->SetContent(AudioData);
 	Request->OnProcessRequestComplete().BindUObject(this, &USpeechToText::OnRecognize);
-	return *CreateWatsonRequest<FSpeechToTextRecognizeRequest>(Request);
+	return CreateWatsonRequest<FSpeechToTextRecognizeRequest>(Request);
 }
 
 
 void USpeechToText::MakeSpeechToTextRequest(UObject* object,TArray<uint8> AudioData, FSpeechToTextRecognizeSuccess OnSuccess, FWatsonRequestFailure OnFailure)
 {
-	TSharedPtr<FSpeechToTextRecognizeRequest> Request = MakeShareable(new FSpeechToTextRecognizeRequest());
-	*Request = Recognize(AudioData);
+	FSpeechToTextRecognizeRequest* Request = Recognize(AudioData);
 	Request->OnSuccess = OnSuccess;
 	Request->OnFailure = OnFailure;
 	Request->Send();
