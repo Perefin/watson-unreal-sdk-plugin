@@ -29,7 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MakeConversationRequest(const FString& WorkspaceId, const FConversationMessageRequest& Message, FConversationMessageSuccess OnSuccess, FWatsonRequestFailure OnFailure);
 	UFUNCTION(BlueprintCallable)
-	FConversationMessageRequest PassContextAndOutputToRequest(FConversationMessageRequest Request, FConversationMessageResponse Response);
+	FConversationMessageRequest PassContextToRequest(FConversationMessageRequest Request, FConversationMessageResponse LastResponse);
 	FConversationListWorkspacesRequest* ListWorkspaces();
 	FConversationGetWorkspaceRequest* GetWorkspace(const FString& WorkspaceId, bool DoExport = false);
 	FConversationListCounterexamplesRequest* ListCounterexamples(const FString& WorkspaceId, int32 PageLimit = 100, bool IncludeCount = false, const FString& Sort = "updated");

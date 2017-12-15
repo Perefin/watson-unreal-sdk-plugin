@@ -10,8 +10,8 @@ struct FTextToSpeechAudio
 	UPROPERTY(BlueprintReadWrite)
 	TArray<uint8> audioData;
 	
-	UPROPERTY()
-	uint32 audioLength;
+	UPROPERTY(BlueprintReadWrite)
+	int32 audioLength;
 	
 	FTextToSpeechAudio() {}
 };

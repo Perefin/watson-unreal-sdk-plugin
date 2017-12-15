@@ -41,10 +41,9 @@ void UConversation::MakeConversationRequest(const FString& WorkspaceId, const FC
 	Request->Send();
 }
 
-FConversationMessageRequest UConversation::PassContextAndOutputToRequest(FConversationMessageRequest Request, FConversationMessageResponse Response)
+FConversationMessageRequest UConversation::PassContextToRequest(FConversationMessageRequest Request, FConversationMessageResponse LastResponse)
 {
-	Request.context = Response.context;
-	Request.output = Response.output;
+	Request.context = LastResponse.context;
 
 	return Request;
 }

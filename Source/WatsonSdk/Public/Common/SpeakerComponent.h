@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "Components/AudioComponent.h"
 #include "Sound/SoundWaveProcedural.h"
+#include "WatsonService.h"
+#include "TextToSpeechSynthesizeModel.h"
 #include "SpeakerComponent.generated.h"
 
 
@@ -27,15 +29,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	//UFUNCTION(BlueprintCallable)
-	void PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLength);
 	UFUNCTION(BlueprintCallable)
-	void PlayAudio(const TArray<uint8>& AudioData, int32 AudioLength);
+	void PlayAudio(TArray<uint8> AudioData, int32 AudioLength);
+	UFUNCTION(BlueprintCallable)
+	//void PlayAudio(const TArray<uint8>& AudioData, int32 AudioLength);
+	void PlayAudioResponse(FTextToSpeechAudio Response);
 //private:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UAudioComponent* AudioOutputComponent;
 
-	UPROPERTY(BlueprintReadWrite, Transient)
-		USoundWaveProcedural* AudioPCMComponent;
+	//UPROPERTY(BlueprintReadWrite, Transient)
+	UPROPERTY(BlueprintReadWrite)
+	USoundWaveProcedural* AudioPCMComponent;
 
 };

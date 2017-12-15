@@ -35,7 +35,7 @@ FTextToSpeechSynthesizeAudioRequest* UTextToSpeech::SynthesizeAudio(const FStrin
 	return CreateWatsonRequest<FTextToSpeechSynthesizeAudioRequest>(Request);
 }
 
-void UTextToSpeech::MakeTextToSpeechRequest(const FString& Text, const FString& Voice, const FString& CustomizationId, const FString& Accept, FTextToSpeechSynthesizeAudioSuccess OnSuccess, FWatsonRequestFailure OnFailure)
+void UTextToSpeech::MakeTextToSpeechRequest(const FString& Text, FTextToSpeechSynthesizeAudioSuccess OnSuccess, FWatsonRequestFailure OnFailure, const FString& Voice, const FString& CustomizationId, const FString& Accept)
 {
 	FTextToSpeechSynthesizeAudioRequest* Request = SynthesizeAudio(Text, Voice, CustomizationId, Accept);
 	Request->OnSuccess = OnSuccess;

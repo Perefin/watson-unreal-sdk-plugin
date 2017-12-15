@@ -33,6 +33,10 @@ public:
 	void OnConversationMessage(FConversationMessageResponse Response);
 	UFUNCTION(BlueprintCallable)
 	void OnConversationFailure(FString Error);
+	UFUNCTION(BlueprintCallable)
+	void OnTextToSpeechSynthesize(FTextToSpeechAudio Response);
+	UFUNCTION(BlueprintCallable)
+	void OnTextToSpeechFailure(FString Error);
 
 	//UPROPERTY()
 	TSharedPtr<FConversationMessageResponse> LastResponse;

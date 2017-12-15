@@ -10,8 +10,7 @@ USpeakerComponent::USpeakerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	AudioPCMComponent = CreateDefaultSubobject<USoundWaveProcedural>(TEXT("AudioPCMComponent"));
-	//AudioPCMComponent = NewObject<USoundWaveProcedural>(this, USoundWaveProcedural::StaticClass());
+	AudioPCMComponent = NewObject<USoundWaveProcedural>();
 	AudioPCMComponent->SampleRate = 16000;
 	AudioPCMComponent->NumChannels = 1;
 	AudioPCMComponent->Duration = INDEFINITELY_LOOPING_DURATION;
@@ -22,7 +21,6 @@ USpeakerComponent::USpeakerComponent()
 	AudioOutputComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioOutputComponent"));
 	AudioOutputComponent->bAutoActivate = true;
 	AudioOutputComponent->bAlwaysPlay = true;
-	/*AudioOutputComponent->SetSound(AudioPCMComponent);*/
 }
 
 
@@ -44,15 +42,32 @@ void USpeakerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
-void USpeakerComponent::PlayAudio(const TArray<uint8>& AudioData, uint32 AudioLength)
+void USpeakerComponent::PlayAudio(TArray<uint8> AudioData, int32 AudioLength)
 {
-	AudioOutputComponent->SetSound(AudioPCMComponent);
-	AudioPCMComponent->QueueAudio(AudioData.GetData(), AudioLength / 16 * 16);
-	AudioOutputComponent->Play();
+	
+	if (AudioPCMComponent != nullptr)
+	{
+		AudioOutputComponent->SetSound(AudioPCMComponent);
+		AudioPCMComponent->QueueAudio(AudioData.GetData(), AudioData.GetAllocatedSize());
+		AudioOutputComponent->Play();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Sound Not Created Trying Again"));
+		AudioPCMComponent = NewObject<USoundWaveProcedural>();
+		AudioPCMComponent->SampleRate = 16000;
+		AudioPCMComponent->NumChannels = 1;
+		AudioPCMComponent->Duration = INDEFINITELY_LOOPING_DURATION;
+		AudioPCMComponent->SoundGroup = SOUNDGROUP_Voice;
+		AudioPCMComponent->bLooping = false;
+		AudioPCMComponent->bProcedural = true;
+		AudioOutputComponent->SetSound(AudioPCMComponent);
+		AudioPCMComponent->QueueAudio(AudioData.GetData(), AudioData.GetAllocatedSize());
+		AudioOutputComponent->Play();
+	}
 }
 
-void USpeakerComponent::PlayAudio(const TArray<uint8>& AudioData, int32 AudioLength)
+void USpeakerComponent::PlayAudioResponse(FTextToSpeechAudio Response)
 {
-	PlayAudio(AudioData,(uint32) AudioLength);
+	PlayAudio(Response.audioData, Response.audioLength);
 }
-

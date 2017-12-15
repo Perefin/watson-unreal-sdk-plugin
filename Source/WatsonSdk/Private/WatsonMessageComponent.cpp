@@ -111,3 +111,13 @@ void UWatsonMessageComponent::OnConversationFailure(FString Error)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Conversation Error: %s"), *Error);
 }
+
+void UWatsonMessageComponent::OnTextToSpeechSynthesize(FTextToSpeechAudio Response)
+{
+	//MySpeaker->PlayAudio(Response.audioData, Response.audioLength);
+}
+
+void UWatsonMessageComponent::OnTextToSpeechFailure(FString Error)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Text To Speech Error: %s"), *Error);
+}
