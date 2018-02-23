@@ -193,6 +193,7 @@ protected:
 // Make sure to create a Microphone Action Mapping for push-to-talk behavior.
 
 #include "MyPawn.h"
+#include "Components/InputComponent.h"
 
 AMyPawn::AMyPawn()
 {
